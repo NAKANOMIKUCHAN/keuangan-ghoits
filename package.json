@@ -1,0 +1,18 @@
+{
+  "name": "project-keuangan",
+  "version": "1.0.0",
+  "description": "Aplikasi Manajemen Keuangan Pribadi Berbasis CRUD",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test_app.js"
+  },
+  "keywords": ["finance", "crud", "express", "accounting"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

@@ -1,0 +1,115 @@
+/* Keuangan Ghoits Custom Stylesheet */
+
+/* Mobile Touch & Tap Polish */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Modal Open Transition */
+#modalTransaction:not(.hidden),
+#modalDeleteConfirm:not(.hidden),
+#modalQrCode:not(.hidden) {
+  opacity: 1;
+}
+
+#modalTransaction:not(.hidden) #modalContainer,
+#modalQrCode:not(.hidden) #modalQrContainer {
+  transform: scale(1);
+}
+
+/* Badge Glow & Styling */
+.badge-income {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-expense {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Table Row Hover */
+.table-row-hover:hover {
+  background-color: #f8fafc;
+}
+
+/* Toast Animation */
+.toast-active {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Mobile Specific Optimizations */
+@media (max-width: 640px) {
+  /* Prevent iOS zoom on input focus */
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 14px !important;
+  }
+
+  /* Modal on Mobile: modern bottom-sheet or centered card */
+  #modalContainer {
+    max-height: 90vh;
+  }
+}
+
+/* Print Styling */
+@media print {
+  header,
+  footer,
+  #btnOpenAddModal,
+  #btnFabAdd,
+  #btnPrint,
+  #btnExportCsv,
+  #modalTransaction,
+  #modalDeleteConfirm,
+  #toast,
+  section:nth-of-type(3) /* filter toolbar */,
+  th:last-child,
+  td:last-child {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .border {
+    border-color: #e2e8f0 !important;
+  }
+
+  .shadow-xs,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+}

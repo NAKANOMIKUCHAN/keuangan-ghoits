@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Keuangan Ghoits - Aplikasi Manajemen Keuangan Pribadi</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            income: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            },
+            expense: {
+              50: '#fef2f2',
+              100: '#fee2e2',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-20 md:pb-6">
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14 sm:h-20">
+        <!-- Brand / Logo -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-500/20">
+            <i data-lucide="wallet-cards" class="w-4 h-4 sm:w-6 sm:h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <span class="text-lg sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-800 bg-clip-text text-transparent">Keuangan Ghoits</span>
+              <span class="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200/60 uppercase">CRUD</span>
+            </div>
+            <p class="text-[10px] sm:text-xs text-slate-500 hidden sm:block">Aplikasi Manajemen & Pencatatan Keuangan</p>
+          </div>
+        </div>
+
+        <!-- Quick Actions Header -->
+        <div class="flex items-center gap-1.5 sm:gap-3">
+          <!-- Print Report -->
+          <button id="btnPrint" title="Cetak Laporan" class="inline-flex items-center gap-1.5 p-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs">
+            <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
+            <span class="hidden md:inline">Cetak</span>
+          </button>
+
+          <!-- Export CSV -->
+          <button id="btnExportCsv" title="Ekspor CSV" class="inline-flex items-center gap-1.5 p-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs">
+            <i data-lucide="download" class="w-4 h-4 text-slate-500"></i>
+            <span class="hidden md:inline">Ekspor CSV</span>
+          </button>
+
+          <!-- Remote & QR Code Button -->
+          <button id="btnOpenQrModal" title="Akses Jarak Jauh & QR Code" class="inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/60 rounded-xl transition shadow-xs active:scale-95">
+            <i data-lucide="qr-code" class="w-4 h-4 text-indigo-600"></i>
+            <span class="hidden sm:inline">Akses HP</span>
+          </button>
+
+          <!-- Add Transaction Button (Desktop & Header) -->
+          <button id="btnOpenAddModal" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl shadow-md shadow-indigo-600/20 active:scale-95 transition">
+            <i data-lucide="plus-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            <span class="sm:inline">Catat Transaksi</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8">
+
+    <!-- Section 1: Financial Summary Cards (Responsive 2 cols on mobile, 4 cols on desktop) -->
+    <section>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-5">
+        <!-- Saldo Bersih Card -->
+        <div class="relative overflow-hidden bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition group">
+          <div class="flex items-center justify-between mb-2 sm:mb-3">
+            <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Saldo Bersih</span>
+            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <i data-lucide="scale" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <h3 id="statBalance" class="text-base sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight truncate">Rp 0</h3>
+            <div id="statBalanceBadge" class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium px-1.5 sm:px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 truncate max-w-full">
+              <span>Menghitung...</span>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
+        </div>
+
+        <!-- Total Pemasukan Card -->
+        <div class="relative overflow-hidden bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-2 sm:mb-3">
+            <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Pemasukan</span>
+            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <i data-lucide="arrow-down-left" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <h3 id="statIncome" class="text-base sm:text-2xl lg:text-3xl font-extrabold text-emerald-600 tracking-tight truncate">Rp 0</h3>
+            <p class="text-[10px] sm:text-[11px] text-slate-500 flex items-center gap-1 truncate">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> Arus masuk
+            </p>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
+        </div>
+
+        <!-- Total Pengeluaran Card -->
+        <div class="relative overflow-hidden bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-2 sm:mb-3">
+            <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Pengeluaran</span>
+            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <i data-lucide="arrow-up-right" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <h3 id="statExpense" class="text-base sm:text-2xl lg:text-3xl font-extrabold text-rose-600 tracking-tight truncate">Rp 0</h3>
+            <p class="text-[10px] sm:text-[11px] text-slate-500 flex items-center gap-1 truncate">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span> Arus keluar
+            </p>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
+        </div>
+
+        <!-- Total Catatan Transaksi -->
+        <div class="relative overflow-hidden bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-2 sm:mb-3">
+            <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Transaksi</span>
+            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <i data-lucide="receipt" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <h3 id="statCount" class="text-base sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">0</h3>
+            <p class="text-[10px] sm:text-[11px] text-slate-500 flex items-center gap-1 truncate">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span> Tersimpan
+            </p>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Visual Charts & Analytics -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <!-- Cashflow Comparison Bar Chart -->
+      <div class="lg:col-span-2 bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
+          <div>
+            <h4 class="text-sm sm:text-base font-bold text-slate-800">Perbandingan Arus Kas</h4>
+            <p class="text-[11px] sm:text-xs text-slate-500">Pemasukan vs Pengeluaran per Bulan</p>
+          </div>
+          <span class="p-1.5 sm:p-2 rounded-xl bg-slate-50 text-slate-400">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          </span>
+        </div>
+        <div class="relative h-52 sm:h-64 w-full">
+          <canvas id="cashflowChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Expense Categories Doughnut Chart -->
+      <div class="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
+          <div>
+            <h4 class="text-sm sm:text-base font-bold text-slate-800">Kategori Pengeluaran</h4>
+            <p class="text-[11px] sm:text-xs text-slate-500">Distribusi Pengeluaran Terbesar</p>
+          </div>
+          <span class="p-1.5 sm:p-2 rounded-xl bg-slate-50 text-slate-400">
+            <i data-lucide="pie-chart" class="w-4 h-4"></i>
+          </span>
+        </div>
+        <div class="relative h-52 sm:h-64 w-full flex items-center justify-center my-auto">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Filter & Search Toolbar (Responsive on mobile) -->
+    <section class="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+      <div class="flex flex-col lg:flex-row gap-2.5 sm:gap-3 items-stretch lg:items-center justify-between">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Cari keterangan, kategori, atau catatan..." 
+            class="w-full pl-9 pr-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition placeholder:text-slate-400"
+          >
+        </div>
+
+        <!-- Filter Dropdowns (Grid 2 cols on mobile, inline on desktop) -->
+        <div class="grid grid-cols-2 sm:flex sm:flex-nowrap gap-2 items-center">
+          <!-- Filter Tipe -->
+          <select id="filterType" class="text-xs sm:text-sm py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-medium text-slate-700 w-full">
+            <option value="all">Semua Tipe</option>
+            <option value="income">🟢 Pemasukan</option>
+            <option value="expense">🔴 Pengeluaran</option>
+          </select>
+
+          <!-- Filter Kategori -->
+          <select id="filterCategory" class="text-xs sm:text-sm py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-medium text-slate-700 w-full truncate">
+            <option value="all">Semua Kategori</option>
+          </select>
+
+          <!-- Filter Dompet -->
+          <select id="filterWallet" class="text-xs sm:text-sm py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-medium text-slate-700 w-full truncate">
+            <option value="all">Semua Dompet</option>
+          </select>
+
+          <!-- Tombol Reset Filter -->
+          <button id="btnResetFilter" title="Reset Semua Filter" class="py-2 px-2.5 text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center justify-center">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            <span class="sm:hidden text-xs ml-1 font-semibold">Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Advanced Date Range Filter Row -->
+      <div class="pt-2.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-slate-600">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-semibold text-slate-700 flex items-center gap-1">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i> Tanggal:
+          </span>
+          <div class="flex items-center gap-1.5">
+            <input type="date" id="filterStartDate" class="py-1 px-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <span class="text-slate-400">-</span>
+            <input type="date" id="filterEndDate" class="py-1 px-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 self-start sm:self-auto">
+          <button id="btnPresetToday" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-[11px] font-medium text-slate-600 transition">Hari Ini</button>
+          <button id="btnPresetThisMonth" class="px-2.5 py-1 rounded-md bg-indigo-50 hover:bg-indigo-100 text-[11px] font-medium text-indigo-700 transition">Bulan Ini</button>
+          <button id="btnPresetAllTime" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-[11px] font-medium text-slate-600 transition">Semua</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Transactions List (CRUD Read) -->
+    <section class="bg-white rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <!-- Table Header & Counter -->
+      <div class="p-3.5 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900">Riwayat Transaksi</h3>
+          <p id="tableCounterText" class="text-[11px] sm:text-xs text-slate-500">Memuat data transaksi...</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnRefresh" class="p-1.5 sm:p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Refresh Data">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- DESKTOP VIEW: Full 6-Column Table (Hidden on Mobile) -->
+      <div class="hidden md:block overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <th class="py-3.5 px-6">Tanggal</th>
+              <th class="py-3.5 px-4">Deskripsi / Keterangan</th>
+              <th class="py-3.5 px-4">Kategori</th>
+              <th class="py-3.5 px-4">Dompet / Akun</th>
+              <th class="py-3.5 px-4 text-right">Nominal (IDR)</th>
+              <th class="py-3.5 px-6 text-center">Aksi (CRUD)</th>
+            </tr>
+          </thead>
+          <tbody id="transactionsTableBody" class="divide-y divide-slate-100 text-xs sm:text-sm">
+            <!-- Dynamic rows will be inserted here via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE VIEW: Touch-Friendly Card List (Hidden on Desktop) -->
+      <div id="transactionsMobileList" class="block md:hidden divide-y divide-slate-100">
+        <!-- Dynamic mobile cards inserted via JavaScript -->
+      </div>
+
+      <!-- Empty State Container -->
+      <div id="emptyState" class="hidden py-12 sm:py-16 px-4 text-center">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
+          <i data-lucide="inbox" class="w-7 h-7 sm:w-8 sm:h-8"></i>
+        </div>
+        <h4 class="text-sm sm:text-base font-bold text-slate-800">Belum Ada Transaksi Ditemukan</h4>
+        <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">Tidak ada data yang sesuai filter atau Anda belum mencatat transaksi.</p>
+        <button id="btnEmptyAdd" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition shadow-xs">
+          <i data-lucide="plus" class="w-4 h-4"></i> Tambah Transaksi
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MOBILE FLOATING ACTION BUTTON (FAB) ================= -->
+  <button id="btnFabAdd" class="md:hidden fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-600/40 flex items-center justify-center active:scale-90 transition transform" title="Catat Transaksi">
+    <i data-lucide="plus" class="w-7 h-7"></i>
+  </button>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-white border-t border-slate-200/80 py-5 mt-8 text-center text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4">
+      <p class="font-medium text-slate-500">Keuangan Ghoits &bull; Sistem Manajemen Keuangan Pribadi (CRUD)</p>
+      <p class="mt-0.5 text-[10px] text-slate-400">100% Responsif di Smartphone &bull; Node.js Express REST API</p>
+    </div>
+  </footer>
+
+  <!-- ================= MODAL: CREATE / UPDATE TRANSAKSI ================= -->
+  <div id="modalTransaction" class="fixed inset-0 z-50 flex items-center sm:items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity overflow-y-auto">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200 max-h-[92vh] flex flex-col my-auto" id="modalContainer">
+      <!-- Modal Header -->
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+        <div>
+          <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-slate-900">Catat Transaksi Baru</h3>
+          <p id="modalSubtitle" class="text-[11px] sm:text-xs text-slate-500">Isi rincian transaksi keuangan Anda</p>
+        </div>
+        <button id="btnCloseModal" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body Form (Scrollable on small phones) -->
+      <form id="transactionForm" class="p-5 space-y-3.5 overflow-y-auto flex-1">
+        <input type="hidden" id="txId">
+
+        <!-- Tipe Transaksi: Segmented Toggle -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tipe Transaksi</label>
+          <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl">
+            <button type="button" id="btnTypeExpense" class="flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-bold transition bg-white text-rose-600 shadow-xs">
+              <i data-lucide="arrow-up-right" class="w-4 h-4"></i> Pengeluaran
+            </button>
+            <button type="button" id="btnTypeIncome" class="flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-emerald-600">
+              <i data-lucide="arrow-down-left" class="w-4 h-4"></i> Pemasukan
+            </button>
+          </div>
+          <input type="hidden" id="txType" value="expense">
+        </div>
+
+        <!-- Nominal / Jumlah -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="txAmount" class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+              Nominal / Jumlah <span class="text-rose-500">*</span>
+            </label>
+            <span id="amountPreview" class="text-xs font-bold text-slate-500">Rp 0</span>
+          </div>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">Rp</span>
+            <input 
+              type="number" 
+              id="txAmount" 
+              required 
+              min="1" 
+              placeholder="0" 
+              class="w-full pl-11 pr-4 py-2.5 text-base font-bold text-slate-800 bg-slate-50 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition"
+            >
+          </div>
+        </div>
+
+        <!-- Deskripsi Transaksi -->
+        <div>
+          <label for="txDescription" class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Keterangan / Deskripsi <span class="text-rose-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="txDescription" 
+            required 
+            placeholder="Contoh: Belanja Bulanan, Bensin, Kopi" 
+            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition"
+          >
+        </div>
+
+        <!-- Kategori & Dompet -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Kategori -->
+          <div>
+            <label for="txCategory" class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Kategori <span class="text-rose-500">*</span>
+            </label>
+            <select id="txCategory" required class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 font-medium">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+
+          <!-- Dompet / Akun -->
+          <div>
+            <label for="txWallet" class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Dompet / Sumber Dana <span class="text-rose-500">*</span>
+            </label>
+            <select id="txWallet" required class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 font-medium">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Tanggal -->
+        <div>
+          <label for="txDate" class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Tanggal Transaksi <span class="text-rose-500">*</span>
+          </label>
+          <input 
+            type="date" 
+            id="txDate" 
+            required 
+            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
+          >
+        </div>
+
+        <!-- Catatan Tambahan (Opsional) -->
+        <div>
+          <label for="txNotes" class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Catatan Tambahan (Opsional)
+          </label>
+          <textarea 
+            id="txNotes" 
+            rows="2" 
+            placeholder="Tambahkan info struk, lokasi, catatan pengingat..." 
+            class="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
+          <button type="button" id="btnCancelModal" class="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" id="btnSaveTransaction" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span id="btnSaveText">Simpan</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: KONFIRMASI HAPUS (DELETE) ================= -->
+  <div id="modalDeleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-100 p-5 sm:p-6 space-y-3.5">
+      <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+        <i data-lucide="trash-2" class="w-6 h-6"></i>
+      </div>
+      <div class="text-center space-y-1">
+        <h4 class="text-base sm:text-lg font-bold text-slate-900">Hapus Transaksi?</h4>
+        <p class="text-xs text-slate-500">Tindakan ini tidak dapat dibatalkan.</p>
+      </div>
+
+      <!-- Preview Item yang akan dihapus -->
+      <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/60 text-xs space-y-1">
+        <div class="flex justify-between font-bold text-slate-800">
+          <span id="delPreviewDesc" class="truncate mr-2">-</span>
+          <span id="delPreviewAmount" class="shrink-0">-</span>
+        </div>
+        <div class="flex justify-between text-slate-500 text-[11px]">
+          <span id="delPreviewDate">-</span>
+          <span id="delPreviewCategory" class="truncate">-</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-2.5 pt-1">
+        <button id="btnCancelDelete" class="w-1/2 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+          Batal
+        </button>
+        <button id="btnConfirmDelete" class="w-1/2 py-2.5 text-xs sm:text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-1.5">
+          <i data-lucide="trash-2" class="w-4 h-4"></i> Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- ================= MODAL: REMOTE ACCESS & QR CODE ================= -->
+  <div id="modalQrCode" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity overflow-y-auto">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200 p-5 sm:p-6 space-y-4 my-auto" id="modalQrContainer">
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <i data-lucide="smartphone" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Akses Jarak Jauh dari HP</h3>
+            <p class="text-[11px] text-slate-500">Scan QR Code dengan kamera ponsel Anda</p>
+          </div>
+        </div>
+        <button id="btnCloseQrModal" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Mode Selector: Jarak Jauh (Internet) vs Lokal (Wi-Fi) -->
+      <div class="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+        <button type="button" id="tabRemoteUrl" class="py-2 rounded-lg bg-white text-indigo-600 shadow-xs transition flex items-center justify-center gap-1.5 font-bold">
+          <i data-lucide="globe" class="w-3.5 h-3.5"></i> Jarak Jauh (4G/5G)
+        </button>
+        <button type="button" id="tabLocalUrl" class="py-2 rounded-lg text-slate-600 hover:text-indigo-600 transition flex items-center justify-center gap-1.5 font-bold">
+          <i data-lucide="wifi" class="w-3.5 h-3.5"></i> Lokal (1 Wi-Fi)
+        </button>
+      </div>
+
+      <!-- QR Code Display Box -->
+      <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex flex-col items-center justify-center">
+        <div class="p-3 bg-white rounded-xl shadow-xs border border-slate-200/60 mb-2.5">
+          <img id="qrCodeImage" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Ftall-mod-barbara-cooperation.trycloudflare.com" alt="QR Code Akses HP" class="w-48 h-48 object-contain rounded-lg">
+        </div>
+        <p id="qrUrlLabel" class="text-xs font-mono font-bold text-indigo-600 break-all text-center select-all px-2">
+          https://tall-mod-barbara-cooperation.trycloudflare.com
+        </p>
+      </div>
+
+      <!-- Cloudflare Direct Note -->
+      <div id="remotePasswordBox" class="p-3 bg-emerald-50 border border-emerald-200/80 rounded-xl text-xs space-y-1 text-emerald-900">
+        <div class="flex items-center gap-1.5 font-bold text-emerald-800">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> Server Cloudflare Aktif (Tanpa Password)
+        </div>
+        <p class="text-[11px] text-emerald-700 leading-relaxed">
+          Link ini dapat dibuka langsung dari browser HP Anda menggunakan kuota internet apa pun tanpa perlu memasukkan password!
+        </p>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex items-center gap-2 pt-1">
+        <button type="button" id="btnCopyUrl" class="w-1/2 py-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center justify-center gap-1.5">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Link
+        </button>
+        <a id="btnDirectOpen" href="https://tall-mod-barbara-cooperation.trycloudflare.com" target="_blank" class="w-1/2 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Buka Link
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION ================= -->
+  <div id="toast" class="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 z-50 flex items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-2xl transition-all transform translate-y-12 opacity-0 pointer-events-none">
+    <div id="toastIcon" class="w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0">
+      <i data-lucide="check" class="w-4 h-4"></i>
+    </div>
+    <div class="text-xs">
+      <p id="toastTitle" class="font-bold">Sukses</p>
+      <p id="toastMessage" class="text-slate-300">Operasi berhasil dijalankan</p>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
