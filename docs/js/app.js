@@ -1,73 +1,39 @@
 /**
- * Keuangan Ghoits - Standalone & Serverless Edition (LocalStorage)
- * 100% Bebas Server & Bebas Token, persis seperti web Aqua Spartan.
- * Data tersimpan permanen di memori browser (HP / Laptop).
+ * Keuangan Ghoits & Azzra - Multi-Profile LocalStorage Edition
+ * 100% Bebas Server & Bebas Token, Aktif 24 Jam di GitHub Pages.
  */
 
-const STORAGE_KEY = 'keuangan_ghoits_data_v1';
-const GITHUB_PAGES_URL = 'https://nakanomikuchan.github.io/keuangan-ghoits/';
-
-// Data Awal Realistis (Saldo Rp 1.335.000)
-const INITIAL_DATABASE = {
-  transactions: [
-    {
-      id: "tx-1a8d573a",
-      date: "2026-10-15",
-      type: "expense",
-      amount: 30000,
-      category: "Makanan & Minuman",
-      wallet: "Uang Tunai / Kas",
-      description: "minuman indomaret coffe",
-      notes: "",
-      createdAt: "2026-10-15T07:08:11.436Z"
-    },
-    {
-      id: "tx-6c64075d",
-      date: "2026-10-15",
-      type: "expense",
-      amount: 1200000,
-      category: "Pengeluaran Lainnya",
-      wallet: "Uang Tunai / Kas",
-      description: "masuk ke tabungan",
-      notes: "",
-      createdAt: "2026-10-15T06:06:48.238Z"
-    },
-    {
-      id: "tx-d698d65c",
-      date: "2026-10-15",
-      type: "income",
-      amount: 1335000,
-      category: "Gaji Pokok",
-      wallet: "Uang Tunai / Kas",
-      description: "uang pokok",
-      notes: "",
-      createdAt: "2026-10-15T05:24:52.836Z"
-    }
-  ],
-  categories: [
-    { id: "cat-in-1", name: "Gaji Pokok", type: "income", icon: "wallet", color: "#10B981" },
-    { id: "cat-in-2", name: "Freelance & Bisnis", type: "income", icon: "laptop", color: "#3B82F6" },
-    { id: "cat-in-3", name: "Investasi & Dividen", type: "income", icon: "trending-up", color: "#8B5CF6" },
-    { id: "cat-in-4", name: "Bonus & Hadiah", type: "income", icon: "gift", color: "#EC4899" },
-    { id: "cat-in-5", name: "Pemasukan Lainnya", type: "income", icon: "plus-circle", color: "#6B7280" },
-    { id: "cat-ex-1", name: "Makanan & Minuman", type: "expense", icon: "utensils", color: "#EF4444" },
-    { id: "cat-ex-2", name: "Belanja Kebutuhan", type: "expense", icon: "shopping-cart", color: "#F97316" },
-    { id: "cat-ex-3", name: "Transportasi & Bensin", type: "expense", icon: "car", color: "#F59E0B" },
-    { id: "cat-ex-4", name: "Tagihan & Utilitas", type: "expense", icon: "file-text", color: "#6366F1" },
-    { id: "cat-ex-5", name: "Hiburan & Hobi", type: "expense", icon: "film", color: "#14B8A6" },
-    { id: "cat-ex-6", name: "Kesehatan & Medis", type: "expense", icon: "heart-pulse", color: "#E11D48" },
-    { id: "cat-ex-7", name: "Pendidikan", type: "expense", icon: "book-open", color: "#0284C7" },
-    { id: "cat-ex-8", name: "Pengeluaran Lainnya", type: "expense", icon: "minus-circle", color: "#4B5563" }
-  ],
-  wallets: [
-    { id: "wal-1", name: "Uang Tunai / Kas", type: "cash", balance: 335000, color: "#10B981" },
-    { id: "wal-2", name: "Bank BCA", type: "bank", balance: 950000, color: "#2563EB" },
-    { id: "wal-3", name: "Bank Mandiri", type: "bank", balance: 0, color: "#0284C7" },
-    { id: "wal-4", name: "E-Wallet (GoPay/Dana/OVO)", type: "ewallet", balance: 50000, color: "#8B5CF6" }
-  ]
+const PROFILES = {
+  ghoits: {
+    id: 'ghoits',
+    name: 'Keuangan Ghoits',
+    owner: 'Ghoits',
+    subtitle: 'Manajemen Keuangan Pribadi Ghoits',
+    storageKey: 'keuangan_data_ghoits_v1',
+    themeColor: 'from-indigo-600 to-violet-600',
+    badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200/60',
+    avatarBg: 'bg-indigo-50 text-indigo-600',
+    icon: 'user'
+  },
+  azzra: {
+    id: 'azzra',
+    name: 'Keuangan Azzra',
+    owner: 'Azzra',
+    subtitle: 'Manajemen Keuangan Pribadi Azzra',
+    storageKey: 'keuangan_data_azzra_v1',
+    themeColor: 'from-rose-500 to-pink-600',
+    badgeColor: 'bg-rose-50 text-rose-700 border-rose-200/60',
+    avatarBg: 'bg-rose-50 text-rose-600',
+    icon: 'sparkles'
+  }
 };
 
+const GHOITS_INITIAL = {"transactions":[{"id":"tx-1a8d573a","date":"2026-10-15","type":"expense","amount":30000,"category":"Makanan & Minuman","wallet":"Uang Tunai / Kas","description":"minuman indomaret coffe","notes":"","createdAt":"2026-10-15T07:08:11.436Z"},{"id":"tx-6c64075d","date":"2026-10-15","type":"expense","amount":1200000,"category":"Pengeluaran Lainnya","wallet":"Uang Tunai / Kas","description":"masuk ke tabungan","notes":"","createdAt":"2026-10-15T06:06:48.238Z"},{"id":"tx-d698d65c","date":"2026-10-15","type":"income","amount":1335000,"category":"Gaji Pokok","wallet":"Uang Tunai / Kas","description":"uang pokok","notes":"","createdAt":"2026-10-15T05:24:52.836Z"}],"categories":[{"id":"cat-in-1","name":"Gaji Pokok","type":"income","icon":"wallet","color":"#10B981"},{"id":"cat-in-2","name":"Freelance & Bisnis","type":"income","icon":"laptop","color":"#3B82F6"},{"id":"cat-in-3","name":"Investasi & Dividen","type":"income","icon":"trending-up","color":"#8B5CF6"},{"id":"cat-in-4","name":"Bonus & Hadiah","type":"income","icon":"gift","color":"#EC4899"},{"id":"cat-in-5","name":"Pemasukan Lainnya","type":"income","icon":"plus-circle","color":"#6B7280"},{"id":"cat-ex-1","name":"Makanan & Minuman","type":"expense","icon":"utensils","color":"#EF4444"},{"id":"cat-ex-2","name":"Belanja Kebutuhan","type":"expense","icon":"shopping-cart","color":"#F97316"},{"id":"cat-ex-3","name":"Transportasi & Bensin","type":"expense","icon":"car","color":"#F59E0B"},{"id":"cat-ex-4","name":"Tagihan & Utilitas","type":"expense","icon":"file-text","color":"#6366F1"},{"id":"cat-ex-5","name":"Hiburan & Hobi","type":"expense","icon":"film","color":"#14B8A6"},{"id":"cat-ex-6","name":"Kesehatan & Medis","type":"expense","icon":"heart-pulse","color":"#E11D48"},{"id":"cat-ex-7","name":"Pendidikan","type":"expense","icon":"book-open","color":"#0284C7"},{"id":"cat-ex-8","name":"Pengeluaran Lainnya","type":"expense","icon":"minus-circle","color":"#4B5563"}],"wallets":[{"id":"wal-1","name":"Uang Tunai / Kas","type":"cash","balance":335000,"color":"#10B981"},{"id":"wal-2","name":"Bank BCA","type":"bank","balance":950000,"color":"#2563EB"},{"id":"wal-3","name":"Bank Mandiri","type":"bank","balance":0,"color":"#0284C7"},{"id":"wal-4","name":"E-Wallet (GoPay/Dana/OVO)","type":"ewallet","balance":50000,"color":"#8B5CF6"}]};
+const AZZRA_INITIAL = {"transactions":[{"id":"tx-az-1","date":"2026-10-15","type":"income","amount":1500000,"category":"Gaji Pokok","wallet":"Bank BCA","description":"Saldo Awal Azzra","notes":"Pencatatan awal","createdAt":"2026-10-15T08:00:00.000Z"}],"categories":[{"id":"cat-in-1","name":"Gaji Pokok","type":"income","icon":"wallet","color":"#10B981"},{"id":"cat-in-2","name":"Freelance & Bisnis","type":"income","icon":"laptop","color":"#3B82F6"},{"id":"cat-in-3","name":"Investasi & Dividen","type":"income","icon":"trending-up","color":"#8B5CF6"},{"id":"cat-in-4","name":"Bonus & Hadiah","type":"income","icon":"gift","color":"#EC4899"},{"id":"cat-in-5","name":"Pemasukan Lainnya","type":"income","icon":"plus-circle","color":"#6B7280"},{"id":"cat-ex-1","name":"Makanan & Minuman","type":"expense","icon":"utensils","color":"#EF4444"},{"id":"cat-ex-2","name":"Belanja Kebutuhan","type":"expense","icon":"shopping-cart","color":"#F97316"},{"id":"cat-ex-3","name":"Transportasi & Bensin","type":"expense","icon":"car","color":"#F59E0B"},{"id":"cat-ex-4","name":"Tagihan & Utilitas","type":"expense","icon":"file-text","color":"#6366F1"},{"id":"cat-ex-5","name":"Hiburan & Hobi","type":"expense","icon":"film","color":"#14B8A6"},{"id":"cat-ex-6","name":"Kesehatan & Medis","type":"expense","icon":"heart-pulse","color":"#E11D48"},{"id":"cat-ex-7","name":"Pendidikan","type":"expense","icon":"book-open","color":"#0284C7"},{"id":"cat-ex-8","name":"Pengeluaran Lainnya","type":"expense","icon":"minus-circle","color":"#4B5563"}],"wallets":[{"id":"wal-1","name":"Uang Tunai / Kas","type":"cash","balance":200000,"color":"#10B981"},{"id":"wal-2","name":"Bank BCA","type":"bank","balance":1300000,"color":"#2563EB"},{"id":"wal-3","name":"E-Wallet (ShopeePay/Dana)","type":"ewallet","balance":0,"color":"#EC4899"}]};
+const GITHUB_PAGES_URL = 'https://nakanomikuchan.github.io/keuangan-ghoits/';
+
 const state = {
+  currentProfile: null,
   transactions: [],
   categories: [],
   wallets: [],
@@ -86,11 +52,17 @@ const state = {
   categoryChart: null
 };
 
-// ================= STORAGE FUNCTIONS (LOCAL STORAGE) ================= //
+// ================= STORAGE FUNCTIONS ================= //
 
-function loadDataFromStorage() {
+function getStorageKey() {
+  if (!state.currentProfile) return 'keuangan_data_ghoits_v1';
+  return state.currentProfile.storageKey;
+}
+
+function loadProfileData() {
+  const key = getStorageKey();
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && Array.isArray(parsed.transactions)) {
@@ -98,23 +70,100 @@ function loadDataFromStorage() {
       }
     }
   } catch (e) {
-    console.warn('Gagal membaca storage, menggunakan data default:', e);
+    console.warn('Gagal membaca storage:', e);
   }
 
-  // Jika belum ada data di browser, gunakan INITIAL_DATABASE
-  saveDataToStorage(INITIAL_DATABASE);
-  return INITIAL_DATABASE;
+  // Initial seed
+  const initial = (state.currentProfile && state.currentProfile.id === 'azzra') ? AZZRA_INITIAL : GHOITS_INITIAL;
+  saveProfileData(initial);
+  return initial;
 }
 
-function saveDataToStorage(data) {
+function saveProfileData(data) {
+  const key = getStorageKey();
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(key, JSON.stringify(data));
     return true;
   } catch (e) {
-    console.error('Gagal menyimpan ke storage:', e);
+    console.error('Gagal simpan ke storage:', e);
     showToast('Penyimpanan Penuh', 'Memori browser tidak cukup untuk menyimpan', false);
     return false;
   }
+}
+
+// ================= PROFILE SELECTION & NAVIGATION ================= //
+
+function switchProfile(profileId) {
+  const profile = PROFILES[profileId];
+  if (!profile) return;
+
+  state.currentProfile = profile;
+  localStorage.setItem('keuangan_active_profile', profileId);
+
+  // Update UI Elements untuk profil aktif
+  document.getElementById('headerBrandName').textContent = profile.name;
+  document.getElementById('headerProfileBadge').textContent = profile.owner;
+  document.getElementById('footerProfileText').textContent = profile.name + ' • Sistem Manajemen Keuangan Pribadi';
+  document.title = profile.name + ' - Manajemen Keuangan Pribadi';
+
+  // Sembunyikan layar login dan tampilkan dashboard
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('dashboardScreen').classList.remove('hidden');
+
+  // Load data profil
+  loadCurrentProfileData();
+  lucide.createIcons();
+}
+
+function showLoginScreen() {
+  state.currentProfile = null;
+  localStorage.removeItem('keuangan_active_profile');
+
+  // Perbarui preview saldo di kartu login
+  updateLoginPreviewCards();
+
+  document.getElementById('dashboardScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.title = 'Pilih Akun - Keuangan Ghoits & Azzra';
+  lucide.createIcons();
+}
+
+function updateLoginPreviewCards() {
+  // Hitung saldo Ghoits
+  try {
+    const rawG = localStorage.getItem(PROFILES.ghoits.storageKey);
+    const dbG = rawG ? JSON.parse(rawG) : GHOITS_INITIAL;
+    const balG = (dbG.transactions || []).reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
+    const countG = (dbG.transactions || []).length;
+    const elBalG = document.getElementById('loginBalGhoits');
+    const elCntG = document.getElementById('loginCntGhoits');
+    if (elBalG) elBalG.textContent = formatRupiah(balG);
+    if (elCntG) elCntG.textContent = countG + ' transaksi tersimpan';
+  } catch (e) {}
+
+  // Hitung saldo Azzra
+  try {
+    const rawA = localStorage.getItem(PROFILES.azzra.storageKey);
+    const dbA = rawA ? JSON.parse(rawA) : AZZRA_INITIAL;
+    const balA = (dbA.transactions || []).reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
+    const countA = (dbA.transactions || []).length;
+    const elBalA = document.getElementById('loginBalAzzra');
+    const elCntA = document.getElementById('loginCntAzzra');
+    if (elBalA) elBalA.textContent = formatRupiah(balA);
+    if (elCntA) elCntA.textContent = countA + ' transaksi tersimpan';
+  } catch (e) {}
+}
+
+function loadCurrentProfileData() {
+  const db = loadProfileData();
+  state.categories = db.categories || [];
+  state.wallets = db.wallets || [];
+  state.transactions = db.transactions || [];
+
+  populateFilterDropdowns();
+  updateModalCategories();
+  populateModalWallets();
+  applyFiltersAndRender();
 }
 
 // ================= FORMATTERS & HELPERS ================= //
@@ -179,32 +228,6 @@ function showToast(title, message, isSuccess = true) {
   setTimeout(() => {
     toast.classList.remove('toast-active');
   }, 3500);
-}
-
-// ================= INISIALISASI ================= //
-
-function init() {
-  const today = new Date().toISOString().split('T')[0];
-  const dateInput = document.getElementById('txDate');
-  if (dateInput) dateInput.value = today;
-
-  setPresetThisMonth();
-  setupEventListeners();
-
-  loadAllData();
-  lucide.createIcons();
-}
-
-function loadAllData() {
-  const db = loadDataFromStorage();
-  state.categories = db.categories || [];
-  state.wallets = db.wallets || [];
-  state.transactions = db.transactions || [];
-
-  populateFilterDropdowns();
-  updateModalCategories();
-  populateModalWallets();
-  applyFiltersAndRender();
 }
 
 // ================= DROPDOWNS & FILTERS ================= //
@@ -340,7 +363,7 @@ function renderTable(transactions) {
   const emptyState = document.getElementById('emptyState');
   const counterText = document.getElementById('tableCounterText');
 
-  if (counterText) counterText.textContent = 'Menampilkan ' + transactions.length + ' transaksi';
+  if (counterText) counterText.textContent = 'Menampilkan ' + transactions.length + ' transaksi (' + (state.currentProfile ? state.currentProfile.owner : '') + ')';
 
   if (transactions.length === 0) {
     if (tbody) tbody.innerHTML = '';
@@ -533,7 +556,7 @@ function renderCategoryChart(categoryData) {
 
 function openAddModal() {
   state.currentEditingId = null;
-  document.getElementById('modalTitle').textContent = 'Catat Transaksi Baru';
+  document.getElementById('modalTitle').textContent = 'Catat Transaksi (' + (state.currentProfile ? state.currentProfile.owner : '') + ')';
   document.getElementById('modalSubtitle').textContent = 'Isi rincian informasi transaksi keuangan Anda';
   document.getElementById('btnSaveText').textContent = 'Simpan Transaksi';
   document.getElementById('txId').value = '';
@@ -620,7 +643,7 @@ function handleTransactionSubmit(e) {
     return;
   }
 
-  const db = loadDataFromStorage();
+  const db = loadProfileData();
 
   if (isEditing) {
     const idx = db.transactions.findIndex(t => t.id === id);
@@ -632,11 +655,11 @@ function handleTransactionSubmit(e) {
     db.transactions.unshift(newTx);
   }
 
-  saveDataToStorage(db);
+  saveProfileData(db);
   state.transactions = db.transactions;
 
   showModal(false);
-  showToast(isEditing ? 'Transaksi Diperbarui' : 'Transaksi Dicatat', 'Data tersimpan otomatis di perangkat Anda');
+  showToast(isEditing ? 'Transaksi Diperbarui' : 'Transaksi Dicatat', 'Data ' + state.currentProfile.owner + ' tersimpan otomatis');
   applyFiltersAndRender();
 }
 
@@ -660,13 +683,13 @@ function confirmDelete() {
   const id = state.pendingDeleteId;
   if (!id) return;
 
-  const db = loadDataFromStorage();
+  const db = loadProfileData();
   db.transactions = db.transactions.filter(t => t.id !== id);
-  saveDataToStorage(db);
+  saveProfileData(db);
 
   state.transactions = db.transactions;
   closeDeleteModal();
-  showToast('Transaksi Terhapus', 'Data berhasil dihapus dari perangkat');
+  showToast('Transaksi Terhapus', 'Data berhasil dihapus');
   applyFiltersAndRender();
 }
 
@@ -720,6 +743,7 @@ function triggerExportCsv() {
     showToast('Tidak Ada Data', 'Tidak ada transaksi untuk diekspor', false);
     return;
   }
+  const profileName = state.currentProfile ? state.currentProfile.owner : 'Keuangan';
   const header = 'Tanggal,Tipe,Nominal,Keterangan,Kategori,Dompet,Catatan';
   const rows = txs.map(t => [
     t.date,
@@ -736,10 +760,10 @@ function triggerExportCsv() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'keuangan-ghoits-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.download = 'keuangan-' + profileName.toLowerCase() + '-' + new Date().toISOString().split('T')[0] + '.csv';
   a.click();
   URL.revokeObjectURL(url);
-  showToast('Ekspor Berhasil', txs.length + ' transaksi berhasil diekspor');
+  showToast('Ekspor Berhasil', txs.length + ' transaksi ' + profileName + ' berhasil diekspor');
 }
 
 // ================= MODAL QR CODE ================= //
@@ -764,6 +788,17 @@ function closeQrModal() {
 // ================= EVENT LISTENERS ================= //
 
 function setupEventListeners() {
+  // Tombol pilihan akun di Layar Login
+  const btnSelectGhoits = document.getElementById('btnSelectGhoits');
+  const btnSelectAzzra = document.getElementById('btnSelectAzzra');
+  if (btnSelectGhoits) btnSelectGhoits.addEventListener('click', () => switchProfile('ghoits'));
+  if (btnSelectAzzra) btnSelectAzzra.addEventListener('click', () => switchProfile('azzra'));
+
+  // Tombol Ganti Akun di Navbar
+  const btnSwitchAccount = document.getElementById('btnSwitchAccount');
+  if (btnSwitchAccount) btnSwitchAccount.addEventListener('click', showLoginScreen);
+
+  // Modal Transaksi
   document.getElementById('btnOpenAddModal').addEventListener('click', openAddModal);
   const btnFab = document.getElementById('btnFabAdd');
   if (btnFab) btnFab.addEventListener('click', openAddModal);
@@ -798,7 +833,7 @@ function setupEventListeners() {
   document.getElementById('btnPresetThisMonth').addEventListener('click', () => { setPresetThisMonth(); applyFiltersAndRender(); });
   document.getElementById('btnPresetAllTime').addEventListener('click', setPresetAllTime);
   document.getElementById('btnResetFilter').addEventListener('click', resetAllFilters);
-  document.getElementById('btnRefresh').addEventListener('click', loadAllData);
+  document.getElementById('btnRefresh').addEventListener('click', loadCurrentProfileData);
   document.getElementById('btnPrint').addEventListener('click', () => window.print());
   document.getElementById('btnExportCsv').addEventListener('click', triggerExportCsv);
 
@@ -833,7 +868,29 @@ function setupEventListeners() {
   });
 }
 
+// Inisialisasi awal saat halaman dibuka
+function init() {
+  const today = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById('txDate');
+  if (dateInput) dateInput.value = today;
+
+  setPresetThisMonth();
+  setupEventListeners();
+
+  // Cek apakah user sebelumnya sudah memilih profil
+  const savedProfile = localStorage.getItem('keuangan_active_profile');
+  if (savedProfile && PROFILES[savedProfile]) {
+    switchProfile(savedProfile);
+  } else {
+    showLoginScreen();
+  }
+
+  lucide.createIcons();
+}
+
 window.openEditModal = openEditModal;
 window.openDeleteModal = openDeleteModal;
+window.switchProfile = switchProfile;
+window.showLoginScreen = showLoginScreen;
 
 document.addEventListener('DOMContentLoaded', init);
