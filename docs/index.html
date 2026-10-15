@@ -51,15 +51,6 @@
     }
   </script>
 </head>
-
-  <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/80 backdrop-blur-sm flex items-center justify-center hidden">
-    <div class="flex flex-col items-center gap-3">
-      <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-      <p id="loadingMessage" class="text-sm font-semibold text-slate-600">Memuat data dari GitHub...</p>
-    </div>
-  </div>
-
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-20 md:pb-6">
 
   <!-- ================= NAVBAR ================= -->
@@ -98,13 +89,6 @@
           <button id="btnOpenQrModal" title="Akses Jarak Jauh & QR Code" class="inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/60 rounded-xl transition shadow-xs active:scale-95">
             <i data-lucide="qr-code" class="w-4 h-4 text-indigo-600"></i>
             <span class="hidden sm:inline">Akses HP</span>
-          </button>
-
-          
-          <!-- GitHub Token Settings Button -->
-          <button id="btnOpenSetup" title="Pengaturan Token GitHub" class="inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs active:scale-95">
-            <i data-lucide="key-round" class="w-4 h-4 text-indigo-600"></i>
-            <span class="hidden sm:inline">Token</span>
           </button>
 
           <!-- Add Transaction Button (Desktop & Header) -->
@@ -352,7 +336,7 @@
   <footer class="bg-white border-t border-slate-200/80 py-5 mt-8 text-center text-xs text-slate-400">
     <div class="max-w-7xl mx-auto px-4">
       <p class="font-medium text-slate-500">Keuangan Ghoits &bull; Sistem Manajemen Keuangan Pribadi (CRUD)</p>
-      <p class="mt-0.5 text-[10px] text-slate-400">100% Responsif di Smartphone &bull; 100% Bebas Server &bull; GitHub Pages & GitHub API</p>
+      <p class="mt-0.5 text-[10px] text-slate-400">100% Responsif di Smartphone &bull; 100% Bebas Server &bull; Aktif 24 Jam di GitHub Pages</p>
     </div>
   </footer>
 
@@ -519,64 +503,6 @@
       </div>
     </div>
   </div>
-  
-  <!-- ================= MODAL: SETUP TOKEN GITHUB ================= -->
-  <div id="modalSetup" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity overflow-y-auto">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden p-5 sm:p-6 space-y-4 my-auto">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-            <i data-lucide="key-round" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-slate-900">Hubungkan GitHub Storage</h3>
-            <p class="text-[11px] text-slate-500">Simpan transaksi langsung ke repository GitHub</p>
-          </div>
-        </div>
-        <button id="btnCloseSetup" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="p-3.5 bg-indigo-50/70 border border-indigo-100 rounded-xl text-xs text-indigo-900 space-y-1.5">
-        <div class="font-bold flex items-center gap-1.5 text-indigo-800">
-          <i data-lucide="info" class="w-4 h-4 text-indigo-600"></i> Cara Mendapatkan Token (1 Menit):
-        </div>
-        <ol class="list-decimal list-inside space-y-1 text-slate-600 text-[11px] pl-1">
-          <li>Buka <a href="https://github.com/settings/tokens/new" target="_blank" class="text-indigo-600 font-bold underline">github.com/settings/tokens/new</a></li>
-          <li>Isi Note: <b>Keuangan Ghoits</b></li>
-          <li>Centang kotak: ✅ <b>repo</b> (Full control)</li>
-          <li>Scroll ke bawah, klik hijau <b>Generate token</b></li>
-          <li>Salin kode token yang diawali <code>ghp_...</code> ke bawah:</li>
-        </ol>
-      </div>
-
-      <div>
-        <label for="setupToken" class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-          Personal Access Token (PAT)
-        </label>
-        <div class="relative">
-          <input 
-            type="password" 
-            id="setupToken" 
-            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" 
-            class="w-full pl-3 pr-10 py-2.5 text-xs sm:text-sm bg-slate-50 focus:bg-white border border-slate-200 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition"
-          >
-        </div>
-        <p class="text-[10px] text-slate-400 mt-1">Token hanya tersimpan aman di browser Anda dan langsung berkomunikasi ke GitHub.</p>
-      </div>
-
-      <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
-        <button type="button" id="btnSetupLogout" class="px-3 py-2.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition">
-          Hapus
-        </button>
-        <button type="button" id="btnSetupSave" class="flex-1 py-2.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-1.5">
-          <i data-lucide="check" class="w-4 h-4"></i> Simpan & Hubungkan
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- ================= MODAL: REMOTE ACCESS & QR CODE ================= -->
   <div id="modalQrCode" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity overflow-y-auto">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-95 duration-200 p-5 sm:p-6 space-y-4 my-auto" id="modalQrContainer">
@@ -597,13 +523,13 @@
       </div>
 
       
-      <!-- Serverless GitHub Note -->
+      <!-- Serverless Note -->
       <div class="p-3 bg-emerald-50 border border-emerald-200/80 rounded-xl text-xs space-y-1 text-emerald-900">
         <div class="flex items-center gap-1.5 font-bold text-emerald-800">
-          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> Server GitHub Aktif 24 Jam
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> Aktif 24 Jam Bebas Server
         </div>
         <p class="text-[11px] text-emerald-700 leading-relaxed">
-          Website ini berjalan 24 jam nonstop di GitHub Pages. Bisa dibuka dari HP kapan saja dan di mana saja walaupun laptop mati!
+          Scan dengan kamera HP Anda untuk membuka web ini. Data otomatis tersimpan di HP dan tetap aktif walau laptop mati!
         </p>
       </div>
 

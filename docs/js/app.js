@@ -1,13 +1,71 @@
 /**
- * Keuangan Ghoits - GitHub Pages & GitHub API Edition
- * Data tersimpan langsung di repository GitHub: NAKANOMIKUCHAN/keuangan-ghoits/data/database.json
+ * Keuangan Ghoits - Standalone & Serverless Edition (LocalStorage)
+ * 100% Bebas Server & Bebas Token, persis seperti web Aqua Spartan.
+ * Data tersimpan permanen di memori browser (HP / Laptop).
  */
 
-const GITHUB_OWNER = 'NAKANOMIKUCHAN';
-const GITHUB_REPO  = 'keuangan-ghoits';
-const GITHUB_FILE  = 'data/database.json';
-const GITHUB_API_CONTENTS = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_FILE;
-const GITHUB_PAGES_URL = 'https://' + GITHUB_OWNER.toLowerCase() + '.github.io/' + GITHUB_REPO + '/';
+const STORAGE_KEY = 'keuangan_ghoits_data_v1';
+const GITHUB_PAGES_URL = 'https://nakanomikuchan.github.io/keuangan-ghoits/';
+
+// Data Awal Realistis (Saldo Rp 1.335.000)
+const INITIAL_DATABASE = {
+  transactions: [
+    {
+      id: "tx-1a8d573a",
+      date: "2026-10-15",
+      type: "expense",
+      amount: 30000,
+      category: "Makanan & Minuman",
+      wallet: "Uang Tunai / Kas",
+      description: "minuman indomaret coffe",
+      notes: "",
+      createdAt: "2026-10-15T07:08:11.436Z"
+    },
+    {
+      id: "tx-6c64075d",
+      date: "2026-10-15",
+      type: "expense",
+      amount: 1200000,
+      category: "Pengeluaran Lainnya",
+      wallet: "Uang Tunai / Kas",
+      description: "masuk ke tabungan",
+      notes: "",
+      createdAt: "2026-10-15T06:06:48.238Z"
+    },
+    {
+      id: "tx-d698d65c",
+      date: "2026-10-15",
+      type: "income",
+      amount: 1335000,
+      category: "Gaji Pokok",
+      wallet: "Uang Tunai / Kas",
+      description: "uang pokok",
+      notes: "",
+      createdAt: "2026-10-15T05:24:52.836Z"
+    }
+  ],
+  categories: [
+    { id: "cat-in-1", name: "Gaji Pokok", type: "income", icon: "wallet", color: "#10B981" },
+    { id: "cat-in-2", name: "Freelance & Bisnis", type: "income", icon: "laptop", color: "#3B82F6" },
+    { id: "cat-in-3", name: "Investasi & Dividen", type: "income", icon: "trending-up", color: "#8B5CF6" },
+    { id: "cat-in-4", name: "Bonus & Hadiah", type: "income", icon: "gift", color: "#EC4899" },
+    { id: "cat-in-5", name: "Pemasukan Lainnya", type: "income", icon: "plus-circle", color: "#6B7280" },
+    { id: "cat-ex-1", name: "Makanan & Minuman", type: "expense", icon: "utensils", color: "#EF4444" },
+    { id: "cat-ex-2", name: "Belanja Kebutuhan", type: "expense", icon: "shopping-cart", color: "#F97316" },
+    { id: "cat-ex-3", name: "Transportasi & Bensin", type: "expense", icon: "car", color: "#F59E0B" },
+    { id: "cat-ex-4", name: "Tagihan & Utilitas", type: "expense", icon: "file-text", color: "#6366F1" },
+    { id: "cat-ex-5", name: "Hiburan & Hobi", type: "expense", icon: "film", color: "#14B8A6" },
+    { id: "cat-ex-6", name: "Kesehatan & Medis", type: "expense", icon: "heart-pulse", color: "#E11D48" },
+    { id: "cat-ex-7", name: "Pendidikan", type: "expense", icon: "book-open", color: "#0284C7" },
+    { id: "cat-ex-8", name: "Pengeluaran Lainnya", type: "expense", icon: "minus-circle", color: "#4B5563" }
+  ],
+  wallets: [
+    { id: "wal-1", name: "Uang Tunai / Kas", type: "cash", balance: 335000, color: "#10B981" },
+    { id: "wal-2", name: "Bank BCA", type: "bank", balance: 950000, color: "#2563EB" },
+    { id: "wal-3", name: "Bank Mandiri", type: "bank", balance: 0, color: "#0284C7" },
+    { id: "wal-4", name: "E-Wallet (GoPay/Dana/OVO)", type: "ewallet", balance: 50000, color: "#8B5CF6" }
+  ]
+};
 
 const state = {
   transactions: [],
@@ -25,11 +83,41 @@ const state = {
   currentEditingId: null,
   pendingDeleteId: null,
   cashflowChart: null,
-  categoryChart: null,
-  dbSha: null,
-  token: localStorage.getItem('gh_token_keuangan_ghoits') || '',
-  isSaving: false
+  categoryChart: null
 };
+
+// ================= STORAGE FUNCTIONS (LOCAL STORAGE) ================= //
+
+function loadDataFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.transactions)) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('Gagal membaca storage, menggunakan data default:', e);
+  }
+
+  // Jika belum ada data di browser, gunakan INITIAL_DATABASE
+  saveDataToStorage(INITIAL_DATABASE);
+  return INITIAL_DATABASE;
+}
+
+function saveDataToStorage(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return true;
+  } catch (e) {
+    console.error('Gagal menyimpan ke storage:', e);
+    showToast('Penyimpanan Penuh', 'Memori browser tidak cukup untuk menyimpan', false);
+    return false;
+  }
+}
+
+// ================= FORMATTERS & HELPERS ================= //
 
 function formatRupiah(amount) {
   const num = parseFloat(amount) || 0;
@@ -93,155 +181,33 @@ function showToast(title, message, isSuccess = true) {
   }, 3500);
 }
 
-function showLoading(show, message = 'Memuat data dari GitHub...') {
-  const loader = document.getElementById('loadingOverlay');
-  const msgEl = document.getElementById('loadingMessage');
-  if (msgEl) msgEl.textContent = message;
-  if (loader) loader.classList.toggle('hidden', !show);
-}
+// ================= INISIALISASI ================= //
 
-// ================= GITHUB API STORAGE ================= //
-
-async function readDatabaseFromGitHub() {
-  const headers = { 'Accept': 'application/vnd.github.v3+json' };
-  if (state.token) {
-    headers['Authorization'] = 'token ' + state.token;
-  }
-
-  const url = GITHUB_API_CONTENTS + '?t=' + Date.now();
-  const res = await fetch(url, { headers });
-
-  if (!res.ok) {
-    if (res.status === 404) {
-      const fallbackRes = await fetch('../data/database.json?t=' + Date.now()).catch(() => null);
-      if (fallbackRes && fallbackRes.ok) {
-        return await fallbackRes.json();
-      }
-      throw new Error('File data/database.json belum ada di repo GitHub.');
-    }
-    const errObj = await res.json().catch(() => ({}));
-    throw new Error(errObj.message || 'Gagal membaca repository (HTTP ' + res.status + ')');
-  }
-
-  const meta = await res.json();
-  state.dbSha = meta.sha;
-
-  const base64Content = meta.content.replace(/\s/g, '');
-  const binaryString = atob(base64Content);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  const decodedText = new TextDecoder('utf-8').decode(bytes);
-  return JSON.parse(decodedText);
-}
-
-async function writeDatabaseToGitHub(newData) {
-  if (!state.token) {
-    openSetupModal();
-    throw new Error('GitHub Personal Access Token diperlukan untuk menyimpan perubahan.');
-  }
-
-  if (!state.dbSha) {
-    try {
-      const checkRes = await fetch(GITHUB_API_CONTENTS + '?t=' + Date.now(), {
-        headers: {
-          'Authorization': 'token ' + state.token,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-      if (checkRes.ok) {
-        const checkMeta = await checkRes.json();
-        state.dbSha = checkMeta.sha;
-      }
-    } catch (e) {
-      console.warn('Gagal periksa SHA:', e);
-    }
-  }
-
-  const jsonStr = JSON.stringify(newData, null, 2);
-  const utf8Bytes = new TextEncoder().encode(jsonStr);
-  let binary = '';
-  for (let i = 0; i < utf8Bytes.length; i++) {
-    binary += String.fromCharCode(utf8Bytes[i]);
-  }
-  const base64Content = btoa(binary);
-
-  const payload = {
-    message: '[Keuangan Ghoits] Update data ' + new Date().toLocaleString('id-ID'),
-    content: base64Content
-  };
-  if (state.dbSha) {
-    payload.sha = state.dbSha;
-  }
-
-  const res = await fetch(GITHUB_API_CONTENTS, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'token ' + state.token,
-      'Content-Type': 'application/json',
-      'Accept': 'application/vnd.github.v3+json'
-    },
-    body: JSON.stringify(payload)
-  });
-
-  if (!res.ok) {
-    const errObj = await res.json().catch(() => ({}));
-    if (res.status === 409) {
-      throw new Error('Terjadi konflik versi di GitHub. Silakan refresh halaman dan ulangi.');
-    }
-    throw new Error(errObj.message || 'Gagal menyimpan ke GitHub (HTTP ' + res.status + ')');
-  }
-
-  const resData = await res.json();
-  if (resData.content && resData.content.sha) {
-    state.dbSha = resData.content.sha;
-  }
-  return true;
-}
-
-// ================= DATA & UI LOGIC ================= //
-
-async function init() {
+function init() {
   const today = new Date().toISOString().split('T')[0];
   const dateInput = document.getElementById('txDate');
   if (dateInput) dateInput.value = today;
 
   setPresetThisMonth();
   setupEventListeners();
+
+  loadAllData();
   lucide.createIcons();
-
-  await loadAllData();
-
-  if (!state.token) {
-    setTimeout(() => {
-      showToast('Mode Baca Aktif', 'Masukkan GitHub Token di menu Token untuk menambah atau mengedit transaksi', true);
-    }, 1200);
-  }
 }
 
-async function loadAllData() {
-  showLoading(true, 'Memuat data keuangan dari GitHub...');
-  try {
-    const db = await readDatabaseFromGitHub();
-    state.categories = db.categories || [];
-    state.wallets = db.wallets || [];
-    state.transactions = db.transactions || [];
+function loadAllData() {
+  const db = loadDataFromStorage();
+  state.categories = db.categories || [];
+  state.wallets = db.wallets || [];
+  state.transactions = db.transactions || [];
 
-    populateFilterDropdowns();
-    updateModalCategories();
-    populateModalWallets();
-    applyFiltersAndRender();
-  } catch (err) {
-    console.error('Error loadAllData:', err);
-    showToast('Gagal Memuat Data', err.message, false);
-    if (!state.token) {
-      openSetupModal();
-    }
-  } finally {
-    showLoading(false);
-  }
+  populateFilterDropdowns();
+  updateModalCategories();
+  populateModalWallets();
+  applyFiltersAndRender();
 }
+
+// ================= DROPDOWNS & FILTERS ================= //
 
 function populateFilterDropdowns() {
   const catFilter = document.getElementById('filterCategory');
@@ -563,6 +529,8 @@ function renderCategoryChart(categoryData) {
   });
 }
 
+// ================= MODAL OPERATIONS (CRUD) ================= //
+
 function openAddModal() {
   state.currentEditingId = null;
   document.getElementById('modalTitle').textContent = 'Catat Transaksi Baru';
@@ -627,15 +595,8 @@ function showModal(isOpen) {
   }
 }
 
-async function handleTransactionSubmit(e) {
+function handleTransactionSubmit(e) {
   e.preventDefault();
-  if (state.isSaving) return;
-
-  if (!state.token) {
-    showToast('Token Diperlukan', 'Masukkan Personal Access Token GitHub terlebih dahulu.', false);
-    openSetupModal();
-    return;
-  }
 
   const id = state.currentEditingId;
   const isEditing = Boolean(id);
@@ -659,41 +620,24 @@ async function handleTransactionSubmit(e) {
     return;
   }
 
-  state.isSaving = true;
-  const btn = document.getElementById('btnSaveTransaction');
-  btn.disabled = true;
-  btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan ke GitHub...';
-  lucide.createIcons();
+  const db = loadDataFromStorage();
 
-  try {
-    const db = await readDatabaseFromGitHub();
-
-    if (isEditing) {
-      const idx = db.transactions.findIndex(t => t.id === id);
-      if (idx !== -1) {
-        db.transactions[idx] = { ...db.transactions[idx], ...payload, updatedAt: new Date().toISOString() };
-      }
-    } else {
-      const newTx = { id: generateId(), ...payload, createdAt: new Date().toISOString() };
-      db.transactions.unshift(newTx);
+  if (isEditing) {
+    const idx = db.transactions.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      db.transactions[idx] = { ...db.transactions[idx], ...payload, updatedAt: new Date().toISOString() };
     }
-
-    db.meta = { ...(db.meta || {}), updatedAt: new Date().toISOString() };
-    await writeDatabaseToGitHub(db);
-
-    state.transactions = db.transactions;
-    showModal(false);
-    showToast(isEditing ? 'Transaksi Diperbarui' : 'Transaksi Dicatat', 'Data berhasil tersimpan di GitHub!');
-    applyFiltersAndRender();
-  } catch (err) {
-    console.error('Error simpan transaksi:', err);
-    showToast('Gagal Menyimpan', err.message, false);
-  } finally {
-    state.isSaving = false;
-    btn.disabled = false;
-    btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span id="btnSaveText">Simpan Transaksi</span>';
-    lucide.createIcons();
+  } else {
+    const newTx = { id: generateId(), ...payload, createdAt: new Date().toISOString() };
+    db.transactions.unshift(newTx);
   }
+
+  saveDataToStorage(db);
+  state.transactions = db.transactions;
+
+  showModal(false);
+  showToast(isEditing ? 'Transaksi Diperbarui' : 'Transaksi Dicatat', 'Data tersimpan otomatis di perangkat Anda');
+  applyFiltersAndRender();
 }
 
 function openDeleteModal(id) {
@@ -712,41 +656,21 @@ function closeDeleteModal() {
   document.getElementById('modalDeleteConfirm').classList.add('hidden');
 }
 
-async function confirmDelete() {
+function confirmDelete() {
   const id = state.pendingDeleteId;
   if (!id) return;
 
-  if (!state.token) {
-    closeDeleteModal();
-    openSetupModal();
-    showToast('Token Diperlukan', 'Masukkan Personal Access Token GitHub untuk menghapus.', false);
-    return;
-  }
+  const db = loadDataFromStorage();
+  db.transactions = db.transactions.filter(t => t.id !== id);
+  saveDataToStorage(db);
 
-  const btn = document.getElementById('btnConfirmDelete');
-  btn.disabled = true;
-  btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menghapus...';
-  lucide.createIcons();
-
-  try {
-    const db = await readDatabaseFromGitHub();
-    db.transactions = db.transactions.filter(t => t.id !== id);
-    db.meta = { ...(db.meta || {}), updatedAt: new Date().toISOString() };
-    await writeDatabaseToGitHub(db);
-
-    state.transactions = db.transactions;
-    closeDeleteModal();
-    showToast('Transaksi Terhapus', 'Data berhasil dihapus dari GitHub!');
-    applyFiltersAndRender();
-  } catch (err) {
-    console.error('Error hapus:', err);
-    showToast('Gagal Menghapus', err.message, false);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i> Hapus';
-    lucide.createIcons();
-  }
+  state.transactions = db.transactions;
+  closeDeleteModal();
+  showToast('Transaksi Terhapus', 'Data berhasil dihapus dari perangkat');
+  applyFiltersAndRender();
 }
+
+// ================= PRESETS & FILTERS ================= //
 
 function setPresetToday() {
   const today = new Date().toISOString().split('T')[0];
@@ -818,56 +742,7 @@ function triggerExportCsv() {
   showToast('Ekspor Berhasil', txs.length + ' transaksi berhasil diekspor');
 }
 
-function openSetupModal() {
-  const modal = document.getElementById('modalSetup');
-  const input = document.getElementById('setupToken');
-  if (input) input.value = state.token || '';
-  if (modal) modal.classList.remove('hidden');
-}
-
-function closeSetupModal() {
-  const modal = document.getElementById('modalSetup');
-  if (modal) modal.classList.add('hidden');
-}
-
-async function handleSetupSave() {
-  const input = document.getElementById('setupToken');
-  const val = input ? input.value.trim() : '';
-
-  if (!val) {
-    showToast('Token Kosong', 'Silakan masukkan token atau biarkan kosong untuk mode baca saja', false);
-    return;
-  }
-
-  const btn = document.getElementById('btnSetupSave');
-  btn.disabled = true;
-  btn.textContent = 'Memverifikasi ke GitHub...';
-
-  try {
-    const res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO, {
-      headers: {
-        'Authorization': 'token ' + val,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-
-    if (!res.ok) {
-      throw new Error('Token tidak memiliki izin akses ke repo ' + GITHUB_REPO);
-    }
-
-    state.token = val;
-    localStorage.setItem('gh_token_keuangan_ghoits', val);
-    closeSetupModal();
-    showToast('Token Berhasil Disimpan', 'Sekarang kamu bisa menambah, mengedit, dan menghapus transaksi!');
-    await loadAllData();
-  } catch (err) {
-    console.error('Setup error:', err);
-    showToast('Verifikasi Gagal', err.message, false);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Simpan & Hubungkan';
-  }
-}
+// ================= MODAL QR CODE ================= //
 
 function openQrModal() {
   const qrImg = document.getElementById('qrCodeImage');
@@ -885,6 +760,8 @@ function openQrModal() {
 function closeQrModal() {
   document.getElementById('modalQrCode').classList.add('hidden');
 }
+
+// ================= EVENT LISTENERS ================= //
 
 function setupEventListeners() {
   document.getElementById('btnOpenAddModal').addEventListener('click', openAddModal);
@@ -941,29 +818,10 @@ function setupEventListeners() {
     });
   }
 
-  const btnOpenSetup = document.getElementById('btnOpenSetup');
-  if (btnOpenSetup) btnOpenSetup.addEventListener('click', openSetupModal);
-  const btnCloseSetup = document.getElementById('btnCloseSetup');
-  if (btnCloseSetup) btnCloseSetup.addEventListener('click', closeSetupModal);
-  const btnSetupSave = document.getElementById('btnSetupSave');
-  if (btnSetupSave) btnSetupSave.addEventListener('click', handleSetupSave);
-  const btnSetupLogout = document.getElementById('btnSetupLogout');
-  if (btnSetupLogout) {
-    btnSetupLogout.addEventListener('click', () => {
-      localStorage.removeItem('gh_token_keuangan_ghoits');
-      state.token = '';
-      const input = document.getElementById('setupToken');
-      if (input) input.value = '';
-      closeSetupModal();
-      showToast('Token Dihapus', 'Sekarang dalam mode baca.');
-    });
-  }
-
   window.addEventListener('click', e => {
     if (e.target === document.getElementById('modalTransaction')) showModal(false);
     if (e.target === document.getElementById('modalDeleteConfirm')) closeDeleteModal();
     if (e.target === document.getElementById('modalQrCode')) closeQrModal();
-    if (e.target === document.getElementById('modalSetup')) closeSetupModal();
   });
 
   window.addEventListener('keydown', e => {
@@ -971,7 +829,6 @@ function setupEventListeners() {
       showModal(false);
       closeDeleteModal();
       closeQrModal();
-      closeSetupModal();
     }
   });
 }
