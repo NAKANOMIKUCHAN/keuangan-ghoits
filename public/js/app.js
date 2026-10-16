@@ -421,144 +421,6 @@ function updateMusicButtonUI() {
 window.handleTrackSelect = handleTrackSelect;
 window.handleCustomUploadClick = handleCustomUploadClick;
 
-
-function closeTrackModal() {
-  const modal = document.getElementById('modalTrackSelector');
-  if (modal) modal.classList.add('hidden');
-}
-
-function selectTrack(trackKey, displayName) {
-  currentTrackKey = trackKey;
-  localStorage.setItem('ghoits_active_track', trackKey);
-
-  const targetUrl = TRACKS[trackKey]?.url || TRACKS.wait_and_bleed.url;
-
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
-  if (audioInstance) {
-    audioInstance.src = targetUrl;
-    // Di mobile, langsung play saat klik user eksplisit
-    audioInstance.play().then(() => {
-      isMusicPlaying = true;
-      showToast('Memutar Lagu 🤘', displayName, true);
-      updateMusicButtonUI();
-    }).catch(err => {
-      console.warn('Play error:', err);
-    });
-  }
-
-  closeTrackModal();
-  updateMusicButtonUI();
-}
-
-function handleMusicPlayClick(e) {
-  if (e) e.stopPropagation();
-
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
-  if (!audioInstance) return;
-
-  // Pastikan src terpasang
-  if (!audioInstance.src || audioInstance.src === '' || audioInstance.src.endsWith('/')) {
-    audioInstance.src = TRACKS[currentTrackKey]?.url || TRACKS.wait_and_bleed.url;
-  }
-
-  if (isMusicPlaying) {
-    audioInstance.pause();
-    isMusicPlaying = false;
-    showToast('Musik Dijeda', getTrackDisplayName(), true);
-    updateMusicButtonUI();
-  } else {
-    // Di mobile HP, panggil play() langsung di tap handler
-    const playPromise = audioInstance.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        isMusicPlaying = true;
-        showToast('Memutar Lagu 🤘', getTrackDisplayName(), true);
-        updateMusicButtonUI();
-      }).catch(err => {
-        console.warn('Audio play error:', err);
-        // Fallback: buka modal pilihan jika belum siap
-        showToast('Memutar Audio', 'Menghubungkan ke pemutar audio...', true);
-        setTimeout(() => {
-          audioInstance.play().then(() => {
-            isMusicPlaying = true;
-            updateMusicButtonUI();
-          }).catch(() => {});
-        }, 100);
-      });
-    }
-  }
-}
-
-function handleAudioFileSelected(e) {
-  const file = e.target.files && e.target.files[0];
-  if (!file) return;
-
-  const url = URL.createObjectURL(file);
-  customUserTrackUrl = url;
-  customUserTrackName = file.name.replace(/\.[^/.]+$/, '');
-  currentTrackKey = 'custom';
-  localStorage.setItem('ghoits_active_track', 'custom');
-
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
-  if (audioInstance) {
-    audioInstance.src = url;
-    audioInstance.play().then(() => {
-      isMusicPlaying = true;
-      showToast('Memutar Lagu dari HP 🎵', customUserTrackName, true);
-      updateMusicButtonUI();
-    }).catch(err => console.warn(err));
-  }
-
-  updateMusicButtonUI();
-}
-
-function getTrackDisplayName() {
-  if (currentTrackKey === 'nero_forte') return 'Nero Forte';
-  if (currentTrackKey === 'custom') return customUserTrackName || 'Lagu Saya';
-  return 'Wait & Bleed';
-}
-
-function updateMusicVisibility() {
-  const container = document.getElementById('ghoitsMusicContainer');
-  if (!container) return;
-
-  if (state.currentProfile && state.currentProfile.id === 'ghoits') {
-    container.classList.remove('hidden');
-    container.classList.add('flex');
-  } else {
-    container.classList.remove('flex');
-    container.classList.add('hidden');
-    if (audioInstance) {
-      audioInstance.pause();
-      isMusicPlaying = false;
-    }
-  }
-  updateMusicButtonUI();
-}
-
-function updateMusicButtonUI() {
-  const btn = document.getElementById('btnPlayCustomMusic');
-  const icon = document.getElementById('musicIcon');
-  const text = document.getElementById('musicText');
-
-  if (!btn) return;
-
-  if (text) {
-    text.textContent = getTrackDisplayName();
-  }
-
-  if (isMusicPlaying) {
-    btn.classList.add('bg-blue-700');
-    if (icon) icon.setAttribute('data-lucide', 'pause');
-  } else {
-    btn.classList.remove('bg-blue-700');
-    if (icon) icon.setAttribute('data-lucide', 'play');
-  }
-  lucide.createIcons();
-}
-
-
-
 /**
  * Keuangan Ghoits & Azzra - Multi-Profile LocalStorage Edition
  * 100% Bebas Server & Bebas Token, Aktif 24 Jam di GitHub Pages.
@@ -787,7 +649,7 @@ function switchProfile(profileId) {
 
   // Load data profil
   loadCurrentProfileData();
-  updateMusicVisibility();
+  updateMusicForActiveProfile();
   lucide.createIcons();
 }
 
@@ -1450,6 +1312,13 @@ function setupEventListeners() {
   const btnSelectAzzra = document.getElementById('btnSelectAzzra');
   if (btnSelectGhoits) btnSelectGhoits.addEventListener('click', () => switchProfileWithAnimation('ghoits'));
   if (btnSelectAzzra) btnSelectAzzra.addEventListener('click', () => switchProfileWithAnimation('azzra'));
+  // Mobile touch support untuk tombol profil (penting untuk iOS/Android)
+  if (btnSelectGhoits) {
+    btnSelectGhoits.addEventListener('touchstart', (e) => { e.preventDefault(); switchProfileWithAnimation('ghoits'); }, { passive: false });
+  }
+  if (btnSelectAzzra) {
+    btnSelectAzzra.addEventListener('touchstart', (e) => { e.preventDefault(); switchProfileWithAnimation('azzra'); }, { passive: false });
+  }
 
   // Tombol Ganti Akun di Navbar
   const btnSwitchAccount = document.getElementById('btnSwitchAccount');
