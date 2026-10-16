@@ -93,12 +93,87 @@ function saveProfileData(data) {
 
 // ================= PROFILE SELECTION & NAVIGATION ================= //
 
+
+let isTransitioning = false;
+
+function switchProfileWithAnimation(profileId) {
+  if (isTransitioning) return;
+  isTransitioning = true;
+
+  const profile = PROFILES[profileId];
+  if (!profile) return;
+
+  const btnGhoits = document.getElementById('btnSelectGhoits');
+  const btnAzzra = document.getElementById('btnSelectAzzra');
+  const overlay = document.getElementById('transitionOverlay');
+  const circle = document.getElementById('transitionCircle');
+
+  const isGhoits = profileId === 'ghoits';
+
+  // 1. Efek Avatar Bouncing & Fading yang tidak dipilih
+  if (isGhoits) {
+    if (btnGhoits) btnGhoits.classList.add('avatar-clicked');
+    if (btnAzzra) btnAzzra.classList.add('avatar-faded');
+    if (circle) circle.className = 'w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 shadow-2xl';
+  } else {
+    if (btnAzzra) btnAzzra.classList.add('avatar-clicked');
+    if (btnGhoits) btnGhoits.classList.add('avatar-faded');
+    if (circle) circle.className = 'w-16 h-16 rounded-full bg-gradient-to-tr from-rose-500 via-pink-500 to-fuchsia-600 shadow-2xl';
+  }
+
+  // 2. Munculkan Shockwave Circle Transisi yang mengembang
+  if (overlay && circle) {
+    overlay.style.opacity = '1';
+    setTimeout(() => {
+      overlay.classList.add('transition-active');
+    }, 20);
+  }
+
+  // 3. Setelah transisi mengembang penuh (450ms), ganti view dan pasang tema
+  setTimeout(() => {
+    switchProfile(profileId);
+
+    // Reset kelas avatar
+    if (btnGhoits) {
+      btnGhoits.classList.remove('avatar-clicked');
+      btnGhoits.classList.remove('avatar-faded');
+    }
+    if (btnAzzra) {
+      btnAzzra.classList.remove('avatar-clicked');
+      btnAzzra.classList.remove('avatar-faded');
+    }
+
+    // Hilangkan shockwave overlay dengan fade out halus
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        overlay.classList.remove('transition-active');
+        isTransitioning = false;
+      }, 400);
+    } else {
+      isTransitioning = false;
+    }
+  }, 450);
+}
+
+function applyTheme(profileId) {
+  document.body.classList.remove('theme-ghoits', 'theme-azzra');
+  if (profileId === 'azzra') {
+    document.body.classList.add('theme-azzra');
+  } else {
+    document.body.classList.add('theme-ghoits');
+  }
+}
+
 function switchProfile(profileId) {
   const profile = PROFILES[profileId];
   if (!profile) return;
 
   state.currentProfile = profile;
   localStorage.setItem('keuangan_active_profile', profileId);
+
+  // Pasang tema warna: Biru untuk Ghoits, Pink untuk Azzra
+  applyTheme(profileId);
 
   // Update UI Elements untuk profil aktif
   document.getElementById('headerBrandName').textContent = profile.name;
@@ -115,7 +190,9 @@ function switchProfile(profileId) {
   lucide.createIcons();
 }
 
+
 function showLoginScreen() {
+  document.body.classList.remove('theme-ghoits', 'theme-azzra');
   state.currentProfile = null;
   localStorage.removeItem('keuangan_active_profile');
 
@@ -769,8 +846,8 @@ function setupEventListeners() {
   // Tombol pilihan akun di Layar Login
   const btnSelectGhoits = document.getElementById('btnSelectGhoits');
   const btnSelectAzzra = document.getElementById('btnSelectAzzra');
-  if (btnSelectGhoits) btnSelectGhoits.addEventListener('click', () => switchProfile('ghoits'));
-  if (btnSelectAzzra) btnSelectAzzra.addEventListener('click', () => switchProfile('azzra'));
+  if (btnSelectGhoits) btnSelectGhoits.addEventListener('click', () => switchProfileWithAnimation('ghoits'));
+  if (btnSelectAzzra) btnSelectAzzra.addEventListener('click', () => switchProfileWithAnimation('azzra'));
 
   // Tombol Ganti Akun di Navbar
   const btnSwitchAccount = document.getElementById('btnSwitchAccount');
@@ -858,6 +935,7 @@ function init() {
   // Cek apakah user sebelumnya sudah memilih profil
   const savedProfile = localStorage.getItem('keuangan_active_profile');
   if (savedProfile && PROFILES[savedProfile]) {
+    applyTheme(savedProfile);
     switchProfile(savedProfile);
   } else {
     showLoginScreen();

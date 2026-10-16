@@ -54,6 +54,12 @@
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
   <!-- ================= SCREEN 1: LOGIN / PILIH AKUN (MINIMALIS & ANIMATED) ================= -->
+  
+    <!-- Transition Shockwave Wave -->
+    <div id="transitionOverlay" class="fixed inset-0 z-50 pointer-events-none opacity-0 flex items-center justify-center overflow-hidden">
+      <div id="transitionCircle" class="w-16 h-16 rounded-full transform scale-0"></div>
+    </div>
+  
   <div id="loginScreen" class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white relative overflow-hidden select-none">
     
     <!-- Ambient Background Glow Effects -->
@@ -123,13 +129,13 @@
           
           <!-- Brand / Logo Dinamis -->
           <div class="flex items-center gap-2 sm:gap-3">
-            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-500/20">
+            <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-500/20 theme-brand-icon">
               <i data-lucide="wallet-cards" class="w-4 h-4 sm:w-6 sm:h-6"></i>
             </div>
             <div>
               <div class="flex items-center gap-1.5 sm:gap-2">
-                <span id="headerBrandName" class="text-lg sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-800 bg-clip-text text-transparent">Keuangan Ghoits</span>
-                <span id="headerProfileBadge" class="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200/60 uppercase">Ghoits</span>
+                <span id="headerBrandName" class="text-lg sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-800 bg-clip-text text-transparent theme-brand-text">Keuangan Ghoits</span>
+                <span id="headerProfileBadge" class="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200/60 uppercase theme-badge">Ghoits</span>
               </div>
               <p class="text-[10px] sm:text-xs text-slate-500 hidden sm:block">Aplikasi Manajemen &amp; Pencatatan Keuangan</p>
             </div>
@@ -139,7 +145,7 @@
           <div class="flex items-center gap-1.5 sm:gap-3">
             
             <!-- Tombol Ganti Akun / Logout -->
-            <button id="btnSwitchAccount" title="Ganti Akun / Pindah Profil" class="inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs active:scale-95">
+            <button id="btnSwitchAccount" title="Ganti Akun / Pindah Profil" class="inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs active:scale-95 theme-switch-btn">
               <i data-lucide="arrow-left-right" class="w-4 h-4 text-indigo-600"></i>
               <span class="hidden sm:inline">Ganti Akun</span>
             </button>
@@ -157,13 +163,13 @@
             </button>
 
             <!-- Remote & QR Code Button -->
-            <button id="btnOpenQrModal" title="Akses Jarak Jauh & QR Code" class="inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/60 rounded-xl transition shadow-xs active:scale-95">
+            <button id="btnOpenQrModal" title="Akses Jarak Jauh & QR Code" class="inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/60 rounded-xl transition shadow-xs active:scale-95 theme-qr-btn">
               <i data-lucide="qr-code" class="w-4 h-4 text-indigo-600"></i>
               <span class="hidden sm:inline">Akses HP</span>
             </button>
 
             <!-- Add Transaction Button -->
-            <button id="btnOpenAddModal" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl shadow-md shadow-indigo-600/20 active:scale-95 transition">
+            <button id="btnOpenAddModal" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl shadow-md shadow-indigo-600/20 active:scale-95 transition theme-primary-btn">
               <i data-lucide="plus-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
               <span class="sm:inline">Catat Transaksi</span>
             </button>
@@ -182,7 +188,7 @@
           <div class="relative overflow-hidden bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition group">
             <div class="flex items-center justify-between mb-2 sm:mb-3">
               <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Saldo Bersih</span>
-              <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center theme-balance-icon">
                 <i data-lucide="scale" class="w-4 h-4 sm:w-5 sm:h-5"></i>
               </div>
             </div>
@@ -192,7 +198,7 @@
                 <span>Menghitung...</span>
               </div>
             </div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500 theme-balance-line"></div>
           </div>
 
           <!-- Total Pemasukan Card -->
@@ -334,7 +340,7 @@
           </div>
           <div class="flex items-center gap-1.5 self-start sm:self-auto">
             <button id="btnPresetToday" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-[11px] font-medium text-slate-600 transition">Hari Ini</button>
-            <button id="btnPresetThisMonth" class="px-2.5 py-1 rounded-md bg-indigo-50 hover:bg-indigo-100 text-[11px] font-medium text-indigo-700 transition">Bulan Ini</button>
+            <button id="btnPresetThisMonth" class="px-2.5 py-1 rounded-md bg-indigo-50 hover:bg-indigo-100 text-[11px] font-medium text-indigo-700 transition theme-month-btn">Bulan Ini</button>
             <button id="btnPresetAllTime" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-[11px] font-medium text-slate-600 transition">Semua</button>
           </div>
         </div>
@@ -392,7 +398,7 @@
     </main>
 
     <!-- FLOATING ACTION BUTTON (MOBILE) -->
-    <button id="btnFabAdd" class="md:hidden fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-600/40 flex items-center justify-center active:scale-90 transition transform" title="Catat Transaksi">
+    <button id="btnFabAdd" class="md:hidden fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-600/40 flex items-center justify-center active:scale-90 transition transform theme-fab" title="Catat Transaksi">
       <i data-lucide="plus" class="w-7 h-7"></i>
     </button>
 
@@ -521,7 +527,7 @@
           <button type="button" id="btnCancelModal" class="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
             Batal
           </button>
-          <button type="submit" id="btnSaveTransaction" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition">
+          <button type="submit" id="btnSaveTransaction" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition theme-save-btn">
             <i data-lucide="check" class="w-4 h-4"></i>
             <span id="btnSaveText">Simpan</span>
           </button>

@@ -191,3 +191,187 @@
   transform: scale(1.12);
   box-shadow: 0 0 35px 8px rgba(244, 63, 94, 0.65);
 }
+
+
+/* ================= CLICK TRANSITION SHOCKWAVE ================= */
+#transitionOverlay {
+  transition: opacity 0.4s ease;
+}
+
+#transitionCircle {
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.transition-active #transitionCircle {
+  transform: scale(45);
+}
+
+.avatar-clicked {
+  transform: scale(1.25) !important;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.avatar-faded {
+  opacity: 0.2 !important;
+  transform: scale(0.85) !important;
+  transition: all 0.3s ease;
+}
+
+/* ================= THEME STYLES: GHOITS (BIRU) & AZZRA (PINK) ================= */
+/* Body Accent Classes */
+body.theme-ghoits {
+  --primary-color: #2563eb;
+  --primary-gradient-start: #2563eb;
+  --primary-gradient-end: #4f46e5;
+  selection-background-color: #3b82f6;
+}
+
+body.theme-azzra {
+  --primary-color: #ec4899;
+  --primary-gradient-start: #f43f5e;
+  --primary-gradient-end: #db2777;
+  selection-background-color: #f43f5e;
+}
+
+/* Dynamic theme elements for Azzra (Pink) */
+body.theme-azzra .theme-brand-icon {
+  background-image: linear-gradient(to top right, #f43f5e, #db2777) !important;
+  box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3) !important;
+  --tw-ring-color: rgba(244, 63, 94, 0.25) !important;
+}
+
+body.theme-azzra .theme-brand-text {
+  background-image: linear-gradient(to right, #0f172a, #881337, #be185d) !important;
+}
+
+body.theme-azzra .theme-badge {
+  background-color: #fdf2f8 !important;
+  color: #db2777 !important;
+  border-color: #fbcfe8 !important;
+}
+
+body.theme-azzra .theme-qr-btn {
+  color: #be185d !important;
+  background-color: #fdf2f8 !important;
+  border-color: #fbcfe8 !important;
+}
+body.theme-azzra .theme-qr-btn:hover {
+  background-color: #fce7f3 !important;
+}
+body.theme-azzra .theme-qr-btn i {
+  color: #ec4899 !important;
+}
+
+body.theme-azzra .theme-primary-btn {
+  background-image: linear-gradient(to right, #f43f5e, #db2777) !important;
+  box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3) !important;
+}
+body.theme-azzra .theme-primary-btn:hover {
+  background-image: linear-gradient(to right, #e11d48, #be185d) !important;
+}
+
+body.theme-azzra .theme-balance-line {
+  background-image: linear-gradient(to right, #f43f5e, #db2777) !important;
+}
+
+body.theme-azzra .theme-balance-icon {
+  background-color: #fdf2f8 !important;
+  color: #db2777 !important;
+}
+
+body.theme-azzra .theme-month-btn {
+  background-color: #fdf2f8 !important;
+  color: #be185d !important;
+}
+body.theme-azzra .theme-month-btn:hover {
+  background-color: #fce7f3 !important;
+}
+
+body.theme-azzra .theme-fab {
+  background-image: linear-gradient(to top right, #f43f5e, #db2777) !important;
+  box-shadow: 0 20px 25px -5px rgba(244, 63, 94, 0.4) !important;
+}
+
+body.theme-azzra .theme-save-btn {
+  background-color: #db2777 !important;
+  box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3) !important;
+}
+body.theme-azzra .theme-save-btn:hover {
+  background-color: #be185d !important;
+}
+
+body.theme-azzra .theme-switch-btn i {
+  color: #ec4899 !important;
+}
+
+/* Dynamic theme elements for Ghoits (Biru) */
+body.theme-ghoits .theme-brand-icon {
+  background-image: linear-gradient(to top right, #2563eb, #4f46e5) !important;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3) !important;
+  --tw-ring-color: rgba(37, 99, 235, 0.25) !important;
+}
+
+body.theme-ghoits .theme-brand-text {
+  background-image: linear-gradient(to right, #0f172a, #1e3a8a, #2563eb) !important;
+}
+
+body.theme-ghoits .theme-badge {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+body.theme-ghoits .theme-qr-btn {
+  color: #1d4ed8 !important;
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+body.theme-ghoits .theme-qr-btn:hover {
+  background-color: #dbeafe !important;
+}
+body.theme-ghoits .theme-qr-btn i {
+  color: #2563eb !important;
+}
+
+body.theme-ghoits .theme-primary-btn {
+  background-image: linear-gradient(to right, #2563eb, #4f46e5) !important;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3) !important;
+}
+body.theme-ghoits .theme-primary-btn:hover {
+  background-image: linear-gradient(to right, #1d4ed8, #4338ca) !important;
+}
+
+body.theme-ghoits .theme-balance-line {
+  background-image: linear-gradient(to right, #2563eb, #4f46e5) !important;
+}
+
+body.theme-ghoits .theme-balance-icon {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+}
+
+body.theme-ghoits .theme-month-btn {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
+body.theme-ghoits .theme-month-btn:hover {
+  background-color: #dbeafe !important;
+}
+
+body.theme-ghoits .theme-fab {
+  background-image: linear-gradient(to top right, #2563eb, #4f46e5) !important;
+  box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4) !important;
+}
+
+body.theme-ghoits .theme-save-btn {
+  background-color: #2563eb !important;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3) !important;
+}
+body.theme-ghoits .theme-save-btn:hover {
+  background-color: #1d4ed8 !important;
+}
+
+body.theme-ghoits .theme-switch-btn i {
+  color: #2563eb !important;
+}

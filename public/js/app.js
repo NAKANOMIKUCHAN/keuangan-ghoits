@@ -1,10 +1,39 @@
 /**
- * Keuangan Ghoits - Frontend Application Logic
- * Mengelola state, REST API calls, operasi CRUD, Chart.js, dan interaksi UI.
+ * Keuangan Ghoits & Azzra - Multi-Profile LocalStorage Edition
+ * 100% Bebas Server & Bebas Token, Aktif 24 Jam di GitHub Pages.
  */
 
-// State Aplikasi
+const PROFILES = {
+  ghoits: {
+    id: 'ghoits',
+    name: 'Keuangan Ghoits',
+    owner: 'Ghoits',
+    subtitle: 'Manajemen Keuangan Pribadi Ghoits',
+    storageKey: 'keuangan_data_ghoits_v1',
+    themeColor: 'from-indigo-600 to-violet-600',
+    badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200/60',
+    avatarBg: 'bg-indigo-50 text-indigo-600',
+    icon: 'user'
+  },
+  azzra: {
+    id: 'azzra',
+    name: 'Keuangan Azzra',
+    owner: 'Azzra',
+    subtitle: 'Manajemen Keuangan Pribadi Azzra',
+    storageKey: 'keuangan_data_azzra_v1',
+    themeColor: 'from-rose-500 to-pink-600',
+    badgeColor: 'bg-rose-50 text-rose-700 border-rose-200/60',
+    avatarBg: 'bg-rose-50 text-rose-600',
+    icon: 'sparkles'
+  }
+};
+
+const GHOITS_INITIAL = {"transactions":[{"id":"tx-1a8d573a","date":"2026-10-15","type":"expense","amount":30000,"category":"Makanan & Minuman","wallet":"Uang Tunai / Kas","description":"minuman indomaret coffe","notes":"","createdAt":"2026-10-15T07:08:11.436Z"},{"id":"tx-6c64075d","date":"2026-10-15","type":"expense","amount":1200000,"category":"Pengeluaran Lainnya","wallet":"Uang Tunai / Kas","description":"masuk ke tabungan","notes":"","createdAt":"2026-10-15T06:06:48.238Z"},{"id":"tx-d698d65c","date":"2026-10-15","type":"income","amount":1335000,"category":"Gaji Pokok","wallet":"Uang Tunai / Kas","description":"uang pokok","notes":"","createdAt":"2026-10-15T05:24:52.836Z"}],"categories":[{"id":"cat-in-1","name":"Gaji Pokok","type":"income","icon":"wallet","color":"#10B981"},{"id":"cat-in-2","name":"Freelance & Bisnis","type":"income","icon":"laptop","color":"#3B82F6"},{"id":"cat-in-3","name":"Investasi & Dividen","type":"income","icon":"trending-up","color":"#8B5CF6"},{"id":"cat-in-4","name":"Bonus & Hadiah","type":"income","icon":"gift","color":"#EC4899"},{"id":"cat-in-5","name":"Pemasukan Lainnya","type":"income","icon":"plus-circle","color":"#6B7280"},{"id":"cat-ex-1","name":"Makanan & Minuman","type":"expense","icon":"utensils","color":"#EF4444"},{"id":"cat-ex-2","name":"Belanja Kebutuhan","type":"expense","icon":"shopping-cart","color":"#F97316"},{"id":"cat-ex-3","name":"Transportasi & Bensin","type":"expense","icon":"car","color":"#F59E0B"},{"id":"cat-ex-4","name":"Tagihan & Utilitas","type":"expense","icon":"file-text","color":"#6366F1"},{"id":"cat-ex-5","name":"Hiburan & Hobi","type":"expense","icon":"film","color":"#14B8A6"},{"id":"cat-ex-6","name":"Kesehatan & Medis","type":"expense","icon":"heart-pulse","color":"#E11D48"},{"id":"cat-ex-7","name":"Pendidikan","type":"expense","icon":"book-open","color":"#0284C7"},{"id":"cat-ex-8","name":"Pengeluaran Lainnya","type":"expense","icon":"minus-circle","color":"#4B5563"}],"wallets":[{"id":"wal-1","name":"Uang Tunai / Kas","type":"cash","balance":335000,"color":"#10B981"},{"id":"wal-2","name":"Bank BCA","type":"bank","balance":950000,"color":"#2563EB"},{"id":"wal-3","name":"Bank Mandiri","type":"bank","balance":0,"color":"#0284C7"},{"id":"wal-4","name":"E-Wallet (GoPay/Dana/OVO)","type":"ewallet","balance":50000,"color":"#8B5CF6"}]};
+const AZZRA_INITIAL = {"transactions":[{"id":"tx-az-1","date":"2026-10-15","type":"income","amount":1500000,"category":"Gaji Pokok","wallet":"Bank BCA","description":"Saldo Awal Azzra","notes":"Pencatatan awal","createdAt":"2026-10-15T08:00:00.000Z"}],"categories":[{"id":"cat-in-1","name":"Gaji Pokok","type":"income","icon":"wallet","color":"#10B981"},{"id":"cat-in-2","name":"Freelance & Bisnis","type":"income","icon":"laptop","color":"#3B82F6"},{"id":"cat-in-3","name":"Investasi & Dividen","type":"income","icon":"trending-up","color":"#8B5CF6"},{"id":"cat-in-4","name":"Bonus & Hadiah","type":"income","icon":"gift","color":"#EC4899"},{"id":"cat-in-5","name":"Pemasukan Lainnya","type":"income","icon":"plus-circle","color":"#6B7280"},{"id":"cat-ex-1","name":"Makanan & Minuman","type":"expense","icon":"utensils","color":"#EF4444"},{"id":"cat-ex-2","name":"Belanja Kebutuhan","type":"expense","icon":"shopping-cart","color":"#F97316"},{"id":"cat-ex-3","name":"Transportasi & Bensin","type":"expense","icon":"car","color":"#F59E0B"},{"id":"cat-ex-4","name":"Tagihan & Utilitas","type":"expense","icon":"file-text","color":"#6366F1"},{"id":"cat-ex-5","name":"Hiburan & Hobi","type":"expense","icon":"film","color":"#14B8A6"},{"id":"cat-ex-6","name":"Kesehatan & Medis","type":"expense","icon":"heart-pulse","color":"#E11D48"},{"id":"cat-ex-7","name":"Pendidikan","type":"expense","icon":"book-open","color":"#0284C7"},{"id":"cat-ex-8","name":"Pengeluaran Lainnya","type":"expense","icon":"minus-circle","color":"#4B5563"}],"wallets":[{"id":"wal-1","name":"Uang Tunai / Kas","type":"cash","balance":200000,"color":"#10B981"},{"id":"wal-2","name":"Bank BCA","type":"bank","balance":1300000,"color":"#2563EB"},{"id":"wal-3","name":"E-Wallet (ShopeePay/Dana)","type":"ewallet","balance":0,"color":"#EC4899"}]};
+const GITHUB_PAGES_URL = 'https://nakanomikuchan.github.io/keuangan-ghoits/';
+
 const state = {
+  currentProfile: null,
   transactions: [],
   categories: [],
   wallets: [],
@@ -23,7 +52,177 @@ const state = {
   categoryChart: null
 };
 
-// Helper: Format Rupiah (IDR)
+// ================= STORAGE FUNCTIONS ================= //
+
+function getStorageKey() {
+  if (!state.currentProfile) return 'keuangan_data_ghoits_v1';
+  return state.currentProfile.storageKey;
+}
+
+function loadProfileData() {
+  const key = getStorageKey();
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.transactions)) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('Gagal membaca storage:', e);
+  }
+
+  // Initial seed
+  const initial = (state.currentProfile && state.currentProfile.id === 'azzra') ? AZZRA_INITIAL : GHOITS_INITIAL;
+  saveProfileData(initial);
+  return initial;
+}
+
+function saveProfileData(data) {
+  const key = getStorageKey();
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+    return true;
+  } catch (e) {
+    console.error('Gagal simpan ke storage:', e);
+    showToast('Penyimpanan Penuh', 'Memori browser tidak cukup untuk menyimpan', false);
+    return false;
+  }
+}
+
+// ================= PROFILE SELECTION & NAVIGATION ================= //
+
+
+let isTransitioning = false;
+
+function switchProfileWithAnimation(profileId) {
+  if (isTransitioning) return;
+  isTransitioning = true;
+
+  const profile = PROFILES[profileId];
+  if (!profile) return;
+
+  const btnGhoits = document.getElementById('btnSelectGhoits');
+  const btnAzzra = document.getElementById('btnSelectAzzra');
+  const overlay = document.getElementById('transitionOverlay');
+  const circle = document.getElementById('transitionCircle');
+
+  const isGhoits = profileId === 'ghoits';
+
+  // 1. Efek Avatar Bouncing & Fading yang tidak dipilih
+  if (isGhoits) {
+    if (btnGhoits) btnGhoits.classList.add('avatar-clicked');
+    if (btnAzzra) btnAzzra.classList.add('avatar-faded');
+    if (circle) circle.className = 'w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 shadow-2xl';
+  } else {
+    if (btnAzzra) btnAzzra.classList.add('avatar-clicked');
+    if (btnGhoits) btnGhoits.classList.add('avatar-faded');
+    if (circle) circle.className = 'w-16 h-16 rounded-full bg-gradient-to-tr from-rose-500 via-pink-500 to-fuchsia-600 shadow-2xl';
+  }
+
+  // 2. Munculkan Shockwave Circle Transisi yang mengembang
+  if (overlay && circle) {
+    overlay.style.opacity = '1';
+    setTimeout(() => {
+      overlay.classList.add('transition-active');
+    }, 20);
+  }
+
+  // 3. Setelah transisi mengembang penuh (450ms), ganti view dan pasang tema
+  setTimeout(() => {
+    switchProfile(profileId);
+
+    // Reset kelas avatar
+    if (btnGhoits) {
+      btnGhoits.classList.remove('avatar-clicked');
+      btnGhoits.classList.remove('avatar-faded');
+    }
+    if (btnAzzra) {
+      btnAzzra.classList.remove('avatar-clicked');
+      btnAzzra.classList.remove('avatar-faded');
+    }
+
+    // Hilangkan shockwave overlay dengan fade out halus
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        overlay.classList.remove('transition-active');
+        isTransitioning = false;
+      }, 400);
+    } else {
+      isTransitioning = false;
+    }
+  }, 450);
+}
+
+function applyTheme(profileId) {
+  document.body.classList.remove('theme-ghoits', 'theme-azzra');
+  if (profileId === 'azzra') {
+    document.body.classList.add('theme-azzra');
+  } else {
+    document.body.classList.add('theme-ghoits');
+  }
+}
+
+function switchProfile(profileId) {
+  const profile = PROFILES[profileId];
+  if (!profile) return;
+
+  state.currentProfile = profile;
+  localStorage.setItem('keuangan_active_profile', profileId);
+
+  // Pasang tema warna: Biru untuk Ghoits, Pink untuk Azzra
+  applyTheme(profileId);
+
+  // Update UI Elements untuk profil aktif
+  document.getElementById('headerBrandName').textContent = profile.name;
+  document.getElementById('headerProfileBadge').textContent = profile.owner;
+  document.getElementById('footerProfileText').textContent = profile.name + ' • Sistem Manajemen Keuangan Pribadi';
+  document.title = profile.name + ' - Manajemen Keuangan Pribadi';
+
+  // Sembunyikan layar login dan tampilkan dashboard
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('dashboardScreen').classList.remove('hidden');
+
+  // Load data profil
+  loadCurrentProfileData();
+  lucide.createIcons();
+}
+
+
+function showLoginScreen() {
+  document.body.classList.remove('theme-ghoits', 'theme-azzra');
+  state.currentProfile = null;
+  localStorage.removeItem('keuangan_active_profile');
+
+  // Perbarui preview saldo di kartu login
+  updateLoginPreviewCards();
+
+  document.getElementById('dashboardScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.title = 'Pilih Akun - Keuangan Ghoits & Azzra';
+  lucide.createIcons();
+}
+
+function updateLoginPreviewCards() {
+  // Detail saldo disembunyikan agar tampilan login bersih dan minimalis (hanya avatar & nama)
+}
+
+function loadCurrentProfileData() {
+  const db = loadProfileData();
+  state.categories = db.categories || [];
+  state.wallets = db.wallets || [];
+  state.transactions = db.transactions || [];
+
+  populateFilterDropdowns();
+  updateModalCategories();
+  populateModalWallets();
+  applyFiltersAndRender();
+}
+
+// ================= FORMATTERS & HELPERS ================= //
+
 function formatRupiah(amount) {
   const num = parseFloat(amount) || 0;
   return new Intl.NumberFormat('id-ID', {
@@ -34,7 +233,6 @@ function formatRupiah(amount) {
   }).format(num);
 }
 
-// Helper: Format Tanggal Indonesia (contoh: 15 Okt 2026)
 function formatDateIndo(dateStr) {
   if (!dateStr) return '-';
   const parts = dateStr.split('-');
@@ -47,21 +245,35 @@ function formatDateIndo(dateStr) {
   }).format(date);
 }
 
-// Helper: Tampilkan Toast Notifikasi
+function generateId() {
+  return 'tx-' + Math.random().toString(36).substr(2, 9);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function showToast(title, message, isSuccess = true) {
   const toast = document.getElementById('toast');
   const toastTitle = document.getElementById('toastTitle');
   const toastMessage = document.getElementById('toastMessage');
   const toastIcon = document.getElementById('toastIcon');
 
+  if (!toast) return;
   toastTitle.textContent = title;
   toastMessage.textContent = message;
 
   if (isSuccess) {
-    toastIcon.className = 'w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center';
+    toastIcon.className = 'w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0';
     toastIcon.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
   } else {
-    toastIcon.className = 'w-6 h-6 rounded-lg bg-rose-500 text-white flex items-center justify-center';
+    toastIcon.className = 'w-6 h-6 rounded-lg bg-rose-500 text-white flex items-center justify-center shrink-0';
     toastIcon.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i>';
   }
 
@@ -73,178 +285,151 @@ function showToast(title, message, isSuccess = true) {
   }, 3500);
 }
 
-// ================= INISIALISASI & LOAD DATA ================= //
+// ================= DROPDOWNS & FILTERS ================= //
 
-async function init() {
-  // Set default tanggal transaksi modal ke hari ini
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('txDate').value = today;
-
-  // Pasang preset awal bulan ini pada filter tanggal
-  setPresetThisMonth();
-
-  // Load referensi dan data transaksi
-  await loadCategoriesAndWallets();
-  await refreshAll();
-
-  // Inisialisasi ikon Lucide
-  lucide.createIcons();
-
-  // Registrasi event listener
-  setupEventListeners();
-}
-
-// Ambil Kategori dan Dompet dari Server
-async function loadCategoriesAndWallets() {
-  try {
-    const [resCats, resWallets] = await Promise.all([
-      fetch('/api/categories'),
-      fetch('/api/wallets')
-    ]);
-
-    const dataCats = await resCats.json();
-    const dataWallets = await resWallets.json();
-
-    if (dataCats.success) state.categories = dataCats.data;
-    if (dataWallets.success) state.wallets = dataWallets.data;
-
-    populateFilterDropdowns();
-    updateModalCategories();
-    populateModalWallets();
-  } catch (err) {
-    console.error('Gagal memuat kategori & dompet:', err);
-    showToast('Koneksi Gagal', 'Gagal memuat kategori dan dompet dari server', false);
-  }
-}
-
-// Isi Dropdown Filter
 function populateFilterDropdowns() {
   const catFilter = document.getElementById('filterCategory');
   const walletFilter = document.getElementById('filterWallet');
 
-  catFilter.innerHTML = '<option value="all">Semua Kategori</option>';
-  state.categories.forEach(c => {
-    catFilter.innerHTML += `<option value="${c.name}">${c.type === 'income' ? '🟢' : '🔴'} ${c.name}</option>`;
-  });
+  if (catFilter) {
+    catFilter.innerHTML = '<option value="all">Semua Kategori</option>';
+    state.categories.forEach(c => {
+      catFilter.innerHTML += '<option value="' + escapeHtml(c.name) + '">' + (c.type === 'income' ? '🟢' : '🔴') + ' ' + escapeHtml(c.name) + '</option>';
+    });
+  }
 
-  walletFilter.innerHTML = '<option value="all">Semua Dompet / Akun</option>';
-  state.wallets.forEach(w => {
-    walletFilter.innerHTML += `<option value="${w.name}">💳 ${w.name}</option>`;
-  });
+  if (walletFilter) {
+    walletFilter.innerHTML = '<option value="all">Semua Dompet / Akun</option>';
+    state.wallets.forEach(w => {
+      walletFilter.innerHTML += '<option value="' + escapeHtml(w.name) + '">💳 ' + escapeHtml(w.name) + '</option>';
+    });
+  }
 }
 
-// Isi Dropdown Kategori di Modal sesuai tipe (income / expense)
 function updateModalCategories() {
-  const currentType = document.getElementById('txType').value;
+  const typeEl = document.getElementById('txType');
+  const currentType = typeEl ? typeEl.value : 'expense';
   const select = document.getElementById('txCategory');
-  select.innerHTML = '';
+  if (!select) return;
 
+  select.innerHTML = '';
   const filtered = state.categories.filter(c => c.type === currentType);
   filtered.forEach(c => {
-    select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+    select.innerHTML += '<option value="' + escapeHtml(c.name) + '">' + escapeHtml(c.name) + '</option>';
   });
 
   if (filtered.length === 0) {
-    select.innerHTML = `<option value="Umum">Umum</option>`;
+    select.innerHTML = '<option value="Umum">Umum</option>';
   }
 }
 
-// Isi Dropdown Dompet di Modal
 function populateModalWallets() {
   const select = document.getElementById('txWallet');
+  if (!select) return;
   select.innerHTML = '';
   state.wallets.forEach(w => {
-    select.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+    select.innerHTML += '<option value="' + escapeHtml(w.name) + '">' + escapeHtml(w.name) + '</option>';
   });
 }
 
-// Refresh Semua Data (Transaksi + Summary)
-async function refreshAll() {
-  await Promise.all([loadTransactions(), loadSummary()]);
-}
+function applyFiltersAndRender() {
+  let txs = [...state.transactions];
 
-// Ambil Ringkasan Finansial untuk Kartu Statistik & Grafik
-async function loadSummary() {
-  try {
-    const query = buildQueryParams();
-    const res = await fetch(`/api/summary?${query}`);
-    const result = await res.json();
-
-    if (result.success) {
-      state.summary = result.data;
-      renderSummaryCards(result.data);
-      renderCharts(result.data);
-    }
-  } catch (err) {
-    console.error('Gagal memuat ringkasan:', err);
+  if (state.filters.type !== 'all') txs = txs.filter(t => t.type === state.filters.type);
+  if (state.filters.category !== 'all') txs = txs.filter(t => t.category === state.filters.category);
+  if (state.filters.wallet !== 'all') txs = txs.filter(t => t.wallet === state.filters.wallet);
+  if (state.filters.startDate) txs = txs.filter(t => t.date >= state.filters.startDate);
+  if (state.filters.endDate) txs = txs.filter(t => t.date <= state.filters.endDate);
+  if (state.filters.search) {
+    const q = state.filters.search.toLowerCase();
+    txs = txs.filter(t =>
+      (t.description && t.description.toLowerCase().includes(q)) ||
+      (t.category && t.category.toLowerCase().includes(q)) ||
+      (t.notes && t.notes.toLowerCase().includes(q))
+    );
   }
+
+  txs.sort((a, b) => {
+    if (b.date !== a.date) return b.date.localeCompare(a.date);
+    return (b.createdAt || '').localeCompare(a.createdAt || '');
+  });
+
+  renderTable(txs);
+  renderSummary(txs);
 }
 
-// Render Kartu Ringkasan Finansial
-function renderSummaryCards(summary) {
+function computeSummary(txs) {
+  const totalIncome = txs.filter(t => t.type === 'income').reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+  const totalExpense = txs.filter(t => t.type === 'expense').reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+  const balance = totalIncome - totalExpense;
+
+  const cashflowByMonth = {};
+  txs.forEach(t => {
+    const month = (t.date || '').slice(0, 7) || 'Lainnya';
+    if (!cashflowByMonth[month]) cashflowByMonth[month] = { income: 0, expense: 0 };
+    if (t.type === 'income') cashflowByMonth[month].income += (parseFloat(t.amount) || 0);
+    else cashflowByMonth[month].expense += (parseFloat(t.amount) || 0);
+  });
+
+  const expenseByCategory = {};
+  txs.filter(t => t.type === 'expense').forEach(t => {
+    const cat = t.category || 'Lainnya';
+    expenseByCategory[cat] = (expenseByCategory[cat] || 0) + (parseFloat(t.amount) || 0);
+  });
+
+  return { totalIncome, totalExpense, balance, transactionCount: txs.length, cashflowByMonth, expenseByCategory };
+}
+
+function renderSummary(txs) {
+  const s = computeSummary(txs);
+  state.summary = s;
+
   const statBalance = document.getElementById('statBalance');
   const statIncome = document.getElementById('statIncome');
   const statExpense = document.getElementById('statExpense');
   const statCount = document.getElementById('statCount');
-  const statBalanceBadge = document.getElementById('statBalanceBadge');
+  const badge = document.getElementById('statBalanceBadge');
 
-  statBalance.textContent = formatRupiah(summary.balance);
-  statIncome.textContent = formatRupiah(summary.totalIncome);
-  statExpense.textContent = formatRupiah(summary.totalExpense);
-  statCount.textContent = summary.transactionCount.toLocaleString('id-ID');
+  if (statBalance) statBalance.textContent = formatRupiah(s.balance);
+  if (statIncome) statIncome.textContent = formatRupiah(s.totalIncome);
+  if (statExpense) statExpense.textContent = formatRupiah(s.totalExpense);
+  if (statCount) statCount.textContent = s.transactionCount.toLocaleString('id-ID');
 
-  // Badge Status Saldo
-  if (summary.balance > 0) {
-    statBalanceBadge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60';
-    statBalanceBadge.innerHTML = '<i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Surplus (Positif)';
-  } else if (summary.balance < 0) {
-    statBalanceBadge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200/60';
-    statBalanceBadge.innerHTML = '<i data-lucide="trending-down" class="w-3.5 h-3.5"></i> Defisit (Negatif)';
-  } else {
-    statBalanceBadge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/60';
-    statBalanceBadge.innerHTML = '<i data-lucide="minus" class="w-3.5 h-3.5"></i> Saldo Seimbang';
+  if (badge) {
+    if (s.balance > 0) {
+      badge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60';
+      badge.innerHTML = '<i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Surplus (Positif)';
+    } else if (s.balance < 0) {
+      badge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200/60';
+      badge.innerHTML = '<i data-lucide="trending-down" class="w-3.5 h-3.5"></i> Defisit (Negatif)';
+    } else {
+      badge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/60';
+      badge.innerHTML = '<i data-lucide="minus" class="w-3.5 h-3.5"></i> Saldo Seimbang';
+    }
   }
 
   lucide.createIcons();
+  renderCharts(s);
 }
 
-// Ambil Transaksi dari Server (Read)
-async function loadTransactions() {
-  try {
-    const query = buildQueryParams();
-    const res = await fetch(`/api/transactions?${query}`);
-    const result = await res.json();
-
-    if (result.success) {
-      state.transactions = result.data;
-      renderTable(result.data);
-    }
-  } catch (err) {
-    console.error('Gagal memuat transaksi:', err);
-    showToast('Gagal', 'Terjadi kesalahan saat memuat data transaksi', false);
-  }
-}
-
-// Render Tabel & Card Transaksi (Desktop Table & Mobile Cards)
 function renderTable(transactions) {
   const tbody = document.getElementById('transactionsTableBody');
   const mobileList = document.getElementById('transactionsMobileList');
   const emptyState = document.getElementById('emptyState');
   const counterText = document.getElementById('tableCounterText');
 
-  counterText.textContent = `Menampilkan ${transactions.length} transaksi`;
+  if (counterText) counterText.textContent = 'Menampilkan ' + transactions.length + ' transaksi (' + (state.currentProfile ? state.currentProfile.owner : '') + ')';
 
   if (transactions.length === 0) {
     if (tbody) tbody.innerHTML = '';
     if (mobileList) mobileList.innerHTML = '';
-    emptyState.classList.remove('hidden');
+    if (emptyState) emptyState.classList.remove('hidden');
     lucide.createIcons();
     return;
   }
 
-  emptyState.classList.add('hidden');
+  if (emptyState) emptyState.classList.add('hidden');
 
-  // 1. Render Desktop Table Rows
   if (tbody) {
     tbody.innerHTML = transactions.map(t => {
       const isIncome = t.type === 'income';
@@ -257,11 +442,11 @@ function renderTable(transactions) {
         <tr class="table-row-hover transition-colors border-b border-slate-100/80">
           <td class="py-3.5 px-6 whitespace-nowrap">
             <div class="font-bold text-slate-800">${formatDateIndo(t.date)}</div>
-            <div class="text-[10px] text-slate-400 font-mono">${t.date}</div>
+            <div class="text-[10px] text-slate-400 font-mono">${escapeHtml(t.date)}</div>
           </td>
           <td class="py-3.5 px-4">
             <div class="font-semibold text-slate-900">${escapeHtml(t.description)}</div>
-            ${t.notes ? `<div class="text-[11px] text-slate-500 mt-0.5 truncate max-w-xs flex items-center gap-1"><i data-lucide="info" class="w-3 h-3 text-slate-400 inline shrink-0"></i> ${escapeHtml(t.notes)}</div>` : ''}
+            ${t.notes ? '<div class="text-[11px] text-slate-500 mt-0.5 truncate max-w-xs flex items-center gap-1"><i data-lucide="info" class="w-3 h-3 text-slate-400 inline shrink-0"></i> ' + escapeHtml(t.notes) + '</div>' : ''}
           </td>
           <td class="py-3.5 px-4 whitespace-nowrap">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${badgeTypeClass}">
@@ -276,37 +461,23 @@ function renderTable(transactions) {
             </span>
           </td>
           <td class="py-3.5 px-4 whitespace-nowrap text-right">
-            <div class="font-extrabold text-sm sm:text-base ${amountColor}">
-              ${sign} ${formatRupiah(t.amount)}
-            </div>
-            <div class="text-[10px] uppercase font-bold tracking-wider ${isIncome ? 'text-emerald-500' : 'text-rose-500'}">
-              ${typeLabel}
-            </div>
+            <div class="font-extrabold text-sm sm:text-base ${amountColor}">${sign} ${formatRupiah(t.amount)}</div>
+            <div class="text-[10px] uppercase font-bold tracking-wider ${isIncome ? 'text-emerald-500' : 'text-rose-500'}">${typeLabel}</div>
           </td>
           <td class="py-3.5 px-6 whitespace-nowrap text-center">
             <div class="inline-flex items-center gap-1.5">
-              <button 
-                onclick="openEditModal('${t.id}')" 
-                class="p-1.5 sm:p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" 
-                title="Edit Transaksi"
-              >
+              <button onclick="openEditModal('${t.id}')" class="p-1.5 sm:p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit">
                 <i data-lucide="edit-3" class="w-4 h-4"></i>
               </button>
-              <button 
-                onclick="openDeleteModal('${t.id}')" 
-                class="p-1.5 sm:p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" 
-                title="Hapus Transaksi"
-              >
+              <button onclick="openDeleteModal('${t.id}')" class="p-1.5 sm:p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
           </td>
-        </tr>
-      `;
+        </tr>`;
     }).join('');
   }
 
-  // 2. Render Mobile Touch-Friendly Card List
   if (mobileList) {
     mobileList.innerHTML = transactions.map(t => {
       const isIncome = t.type === 'income';
@@ -334,57 +505,34 @@ function renderTable(transactions) {
             </div>
           </div>
           <div class="text-right shrink-0">
-            <div class="font-extrabold text-xs sm:text-sm ${amountColor}">
-              ${sign} ${formatRupiah(t.amount)}
-            </div>
+            <div class="font-extrabold text-xs sm:text-sm ${amountColor}">${sign} ${formatRupiah(t.amount)}</div>
             <div class="flex items-center justify-end gap-1 mt-1">
-              <button onclick="openEditModal('${t.id}')" class="p-1 text-slate-400 hover:text-indigo-600 rounded-md transition" title="Edit">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="openDeleteModal('${t.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded-md transition" title="Hapus">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
+              <button onclick="openEditModal('${t.id}')" class="p-1 text-slate-400 hover:text-indigo-600 rounded-md transition"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+              <button onclick="openDeleteModal('${t.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded-md transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
     }).join('');
   }
 
   lucide.createIcons();
 }
 
-// Escape HTML untuk mencegah XSS
-function escapeHtml(text) {
-  if (!text) return '';
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-// ================= CHART RENDERING ================= //
-
 function renderCharts(summary) {
   renderCashflowChart(summary.cashflowByMonth || {});
   renderCategoryChart(summary.expenseByCategory || {});
 }
 
-// Grafik Arus Kas Bar Chart
 function renderCashflowChart(cashflowData) {
-  const ctx = document.getElementById('cashflowChart').getContext('2d');
+  const canvas = document.getElementById('cashflowChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
   const labels = Object.keys(cashflowData).sort();
-
-  if (labels.length === 0) {
-    labels.push(new Date().toISOString().slice(0, 7));
-  }
+  if (labels.length === 0) labels.push(new Date().toISOString().slice(0, 7));
 
   const incomeData = labels.map(l => cashflowData[l] ? cashflowData[l].income : 0);
   const expenseData = labels.map(l => cashflowData[l] ? cashflowData[l].expense : 0);
 
-  // Format label bulan ke teks Indonesia (misal: "Okt 2026")
   const formattedLabels = labels.map(l => {
     const parts = l.split('-');
     if (parts.length === 2) {
@@ -394,116 +542,62 @@ function renderCashflowChart(cashflowData) {
     return l;
   });
 
-  if (state.cashflowChart) {
-    state.cashflowChart.destroy();
-  }
-
+  if (state.cashflowChart) state.cashflowChart.destroy();
   state.cashflowChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: formattedLabels,
       datasets: [
-        {
-          label: 'Pemasukan (IDR)',
-          data: incomeData,
-          backgroundColor: '#10b981',
-          borderRadius: 8,
-          borderSkipped: false
-        },
-        {
-          label: 'Pengeluaran (IDR)',
-          data: expenseData,
-          backgroundColor: '#ef4444',
-          borderRadius: 8,
-          borderSkipped: false
-        }
+        { label: 'Pemasukan (IDR)', data: incomeData, backgroundColor: '#10b981', borderRadius: 8, borderSkipped: false },
+        { label: 'Pengeluaran (IDR)', data: expenseData, backgroundColor: '#ef4444', borderRadius: 8, borderSkipped: false }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'top',
-          labels: { font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600' } }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return `${context.dataset.label}: ${formatRupiah(context.raw)}`;
-            }
-          }
-        }
+        legend: { position: 'top', labels: { font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600' } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + formatRupiah(ctx.raw) } }
       },
       scales: {
         y: {
           beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              if (value >= 1000000) return 'Rp ' + (value / 1000000).toFixed(1) + ' jt';
-              if (value >= 1000) return 'Rp ' + (value / 1000).toFixed(0) + ' rb';
-              return 'Rp ' + value;
-            }
-          },
+          ticks: { callback: v => v >= 1000000 ? 'Rp ' + (v/1000000).toFixed(1) + ' jt' : v >= 1000 ? 'Rp ' + (v/1000).toFixed(0) + ' rb' : 'Rp ' + v },
           grid: { color: '#f1f5f9' }
         },
-        x: {
-          grid: { display: false }
-        }
+        x: { grid: { display: false } }
       }
     }
   });
 }
 
-// Grafik Donut Kategori Pengeluaran
 function renderCategoryChart(categoryData) {
-  const ctx = document.getElementById('categoryChart').getContext('2d');
+  const canvas = document.getElementById('categoryChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
   const labels = Object.keys(categoryData);
   const values = Object.values(categoryData);
 
-  if (state.categoryChart) {
-    state.categoryChart.destroy();
-  }
+  if (state.categoryChart) state.categoryChart.destroy();
+  if (labels.length === 0) { ctx.clearRect(0, 0, 300, 300); return; }
 
-  if (labels.length === 0) {
-    ctx.clearRect(0, 0, 300, 300);
-    return;
-  }
-
-  const colors = [
-    '#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4',
-    '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#64748b'
-  ];
-
+  const colors = ['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#ec4899','#64748b'];
   state.categoryChart = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: labels,
-      datasets: [{
-        data: values,
-        backgroundColor: colors.slice(0, labels.length),
-        borderWidth: 2,
-        borderColor: '#ffffff'
-      }]
+      labels,
+      datasets: [{ data: values, backgroundColor: colors.slice(0, labels.length), borderWidth: 2, borderColor: '#ffffff' }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }
-          }
-        },
+        legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 } } },
         tooltip: {
           callbacks: {
-            label: function(context) {
-              const val = context.raw;
-              const total = values.reduce((a, b) => a + b, 0);
-              const percentage = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-              return `${context.label}: ${formatRupiah(val)} (${percentage}%)`;
+            label: ctx => {
+              const total = values.reduce((a,b) => a+b, 0);
+              return ctx.label + ': ' + formatRupiah(ctx.raw) + ' (' + (total > 0 ? ((ctx.raw/total)*100).toFixed(1) : 0) + '%)';
             }
           }
         }
@@ -513,74 +607,51 @@ function renderCategoryChart(categoryData) {
   });
 }
 
-// ================= MODAL OPERASI (CREATE & UPDATE) ================= //
+// ================= MODAL OPERATIONS (CRUD) ================= //
 
-// Buka Modal Tambah Transaksi
 function openAddModal() {
   state.currentEditingId = null;
-  document.getElementById('modalTitle').textContent = 'Catat Transaksi Baru';
+  document.getElementById('modalTitle').textContent = 'Catat Transaksi (' + (state.currentProfile ? state.currentProfile.owner : '') + ')';
   document.getElementById('modalSubtitle').textContent = 'Isi rincian informasi transaksi keuangan Anda';
   document.getElementById('btnSaveText').textContent = 'Simpan Transaksi';
   document.getElementById('txId').value = '';
-
-  // Reset form
   document.getElementById('txAmount').value = '';
   document.getElementById('amountPreview').textContent = 'Rp 0';
   document.getElementById('txDescription').value = '';
   document.getElementById('txNotes').value = '';
   document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
 
-  // Set default type ke expense
   setTypeToggle('expense');
+  showModal(true);
+}
+
+function openEditModal(id) {
+  const t = state.transactions.find(tx => tx.id === id);
+  if (!t) { showToast('Error', 'Data tidak ditemukan', false); return; }
+
+  state.currentEditingId = t.id;
+  document.getElementById('modalTitle').textContent = 'Edit Data Transaksi';
+  document.getElementById('modalSubtitle').textContent = 'Memperbarui ID: ' + t.id;
+  document.getElementById('btnSaveText').textContent = 'Perbarui Transaksi';
+
+  document.getElementById('txId').value = t.id;
+  document.getElementById('txAmount').value = t.amount;
+  document.getElementById('amountPreview').textContent = formatRupiah(t.amount);
+  document.getElementById('txDescription').value = t.description;
+  document.getElementById('txDate').value = t.date;
+  document.getElementById('txNotes').value = t.notes || '';
+
+  setTypeToggle(t.type);
+  document.getElementById('txCategory').value = t.category;
+  document.getElementById('txWallet').value = t.wallet;
 
   showModal(true);
 }
 
-// Buka Modal Edit Transaksi
-async function openEditModal(id) {
-  try {
-    const res = await fetch(`/api/transactions/${id}`);
-    const result = await res.json();
-
-    if (!result.success || !result.data) {
-      showToast('Error', 'Data transaksi tidak ditemukan', false);
-      return;
-    }
-
-    const t = result.data;
-    state.currentEditingId = t.id;
-
-    document.getElementById('modalTitle').textContent = 'Edit Data Transaksi';
-    document.getElementById('modalSubtitle').textContent = `Memperbarui ID: ${t.id}`;
-    document.getElementById('btnSaveText').textContent = 'Perbarui Transaksi';
-
-    document.getElementById('txId').value = t.id;
-    document.getElementById('txAmount').value = t.amount;
-    document.getElementById('amountPreview').textContent = formatRupiah(t.amount);
-    document.getElementById('txDescription').value = t.description;
-    document.getElementById('txDate').value = t.date;
-    document.getElementById('txNotes').value = t.notes || '';
-
-    // Set tipe & sinkronkan kategori
-    setTypeToggle(t.type);
-
-    document.getElementById('txCategory').value = t.category;
-    document.getElementById('txWallet').value = t.wallet;
-
-    showModal(true);
-  } catch (err) {
-    console.error('Gagal mengambil data edit:', err);
-    showToast('Error', 'Gagal memuat detail transaksi', false);
-  }
-}
-
-// Toggle Segmented Button Tipe Transaksi
 function setTypeToggle(type) {
-  const hiddenType = document.getElementById('txType');
+  document.getElementById('txType').value = type;
   const btnExpense = document.getElementById('btnTypeExpense');
   const btnIncome = document.getElementById('btnTypeIncome');
-
-  hiddenType.value = type;
 
   if (type === 'income') {
     btnIncome.className = 'flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition bg-white text-emerald-600 shadow-xs';
@@ -589,11 +660,9 @@ function setTypeToggle(type) {
     btnExpense.className = 'flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition bg-white text-rose-600 shadow-xs';
     btnIncome.className = 'flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-emerald-600';
   }
-
   updateModalCategories();
 }
 
-// Tampilkan / Tutup Modal
 function showModal(isOpen) {
   const modal = document.getElementById('modalTransaction');
   if (isOpen) {
@@ -604,8 +673,7 @@ function showModal(isOpen) {
   }
 }
 
-// Handle Submit Form Transaksi (CREATE / UPDATE)
-async function handleTransactionSubmit(e) {
+function handleTransactionSubmit(e) {
   e.preventDefault();
 
   const id = state.currentEditingId;
@@ -625,55 +693,40 @@ async function handleTransactionSubmit(e) {
     showToast('Validasi Gagal', 'Nominal harus lebih besar dari 0', false);
     return;
   }
-
   if (!payload.description) {
     showToast('Validasi Gagal', 'Keterangan transaksi wajib diisi', false);
     return;
   }
 
-  const url = isEditing ? `/api/transactions/${id}` : '/api/transactions';
-  const method = isEditing ? 'PUT' : 'POST';
+  const db = loadProfileData();
 
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await res.json();
-
-    if (!result.success) {
-      showToast('Gagal Menyimpan', result.message || 'Terjadi kesalahan', false);
-      return;
+  if (isEditing) {
+    const idx = db.transactions.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      db.transactions[idx] = { ...db.transactions[idx], ...payload, updatedAt: new Date().toISOString() };
     }
-
-    showModal(false);
-    showToast(
-      isEditing ? 'Transaksi Diperbarui' : 'Transaksi Dicatat',
-      result.message || 'Data berhasil disimpan ke sistem'
-    );
-    await refreshAll();
-  } catch (err) {
-    console.error('Error saat menyimpan transaksi:', err);
-    showToast('Error Server', 'Tidak dapat menghubungi server', false);
+  } else {
+    const newTx = { id: generateId(), ...payload, createdAt: new Date().toISOString() };
+    db.transactions.unshift(newTx);
   }
-}
 
-// ================= MODAL OPERASI (DELETE) ================= //
+  saveProfileData(db);
+  state.transactions = db.transactions;
+
+  showModal(false);
+  showToast(isEditing ? 'Transaksi Diperbarui' : 'Transaksi Dicatat', 'Data ' + state.currentProfile.owner + ' tersimpan otomatis');
+  applyFiltersAndRender();
+}
 
 function openDeleteModal(id) {
   const tx = state.transactions.find(t => t.id === id);
   if (!tx) return;
-
   state.pendingDeleteId = id;
   document.getElementById('delPreviewDesc').textContent = tx.description;
-  document.getElementById('delPreviewAmount').textContent = `${tx.type === 'income' ? '+' : '-'} ${formatRupiah(tx.amount)}`;
+  document.getElementById('delPreviewAmount').textContent = (tx.type === 'income' ? '+' : '-') + ' ' + formatRupiah(tx.amount);
   document.getElementById('delPreviewDate').textContent = formatDateIndo(tx.date);
-  document.getElementById('delPreviewCategory').textContent = `${tx.category} (${tx.wallet})`;
-
-  const modalDel = document.getElementById('modalDeleteConfirm');
-  modalDel.classList.remove('hidden');
+  document.getElementById('delPreviewCategory').textContent = tx.category + ' (' + tx.wallet + ')';
+  document.getElementById('modalDeleteConfirm').classList.remove('hidden');
 }
 
 function closeDeleteModal() {
@@ -681,55 +734,21 @@ function closeDeleteModal() {
   document.getElementById('modalDeleteConfirm').classList.add('hidden');
 }
 
-async function confirmDelete() {
+function confirmDelete() {
   const id = state.pendingDeleteId;
   if (!id) return;
 
-  try {
-    const res = await fetch(`/api/transactions/${id}`, {
-      method: 'DELETE'
-    });
-    const result = await res.json();
+  const db = loadProfileData();
+  db.transactions = db.transactions.filter(t => t.id !== id);
+  saveProfileData(db);
 
-    if (result.success) {
-      closeDeleteModal();
-      showToast('Transaksi Terhapus', 'Data transaksi berhasil dihapus dari sistem');
-      await refreshAll();
-    } else {
-      showToast('Gagal Menghapus', result.message || 'Gagal menghapus', false);
-    }
-  } catch (err) {
-    console.error('Error menghapus transaksi:', err);
-    showToast('Error Server', 'Terjadi kesalahan saat menghapus transaksi', false);
-  }
+  state.transactions = db.transactions;
+  closeDeleteModal();
+  showToast('Transaksi Terhapus', 'Data berhasil dihapus');
+  applyFiltersAndRender();
 }
 
-// ================= FILTER & QUERY BUILDER ================= //
-
-function buildQueryParams() {
-  const params = new URLSearchParams();
-
-  if (state.filters.type && state.filters.type !== 'all') {
-    params.append('type', state.filters.type);
-  }
-  if (state.filters.category && state.filters.category !== 'all') {
-    params.append('category', state.filters.category);
-  }
-  if (state.filters.wallet && state.filters.wallet !== 'all') {
-    params.append('wallet', state.filters.wallet);
-  }
-  if (state.filters.startDate) {
-    params.append('startDate', state.filters.startDate);
-  }
-  if (state.filters.endDate) {
-    params.append('endDate', state.filters.endDate);
-  }
-  if (state.filters.search) {
-    params.append('search', state.filters.search);
-  }
-
-  return params.toString();
-}
+// ================= PRESETS & FILTERS ================= //
 
 function setPresetToday() {
   const today = new Date().toISOString().split('T')[0];
@@ -737,181 +756,165 @@ function setPresetToday() {
   document.getElementById('filterEndDate').value = today;
   state.filters.startDate = today;
   state.filters.endDate = today;
-  refreshAll();
+  applyFiltersAndRender();
 }
 
 function setPresetThisMonth() {
   const now = new Date();
   const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
   const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-
-  document.getElementById('filterStartDate').value = firstDay;
-  document.getElementById('filterEndDate').value = lastDay;
+  const elStart = document.getElementById('filterStartDate');
+  const elEnd = document.getElementById('filterEndDate');
+  if (elStart) elStart.value = firstDay;
+  if (elEnd) elEnd.value = lastDay;
   state.filters.startDate = firstDay;
   state.filters.endDate = lastDay;
 }
 
 function setPresetAllTime() {
-  document.getElementById('filterStartDate').value = '';
-  document.getElementById('filterEndDate').value = '';
+  const elStart = document.getElementById('filterStartDate');
+  const elEnd = document.getElementById('filterEndDate');
+  if (elStart) elStart.value = '';
+  if (elEnd) elEnd.value = '';
   state.filters.startDate = '';
   state.filters.endDate = '';
-  refreshAll();
+  applyFiltersAndRender();
 }
 
 function resetAllFilters() {
-  state.filters.type = 'all';
-  state.filters.category = 'all';
-  state.filters.wallet = 'all';
-  state.filters.search = '';
-
+  state.filters = { type: 'all', category: 'all', wallet: 'all', search: '', startDate: '', endDate: '' };
   document.getElementById('filterType').value = 'all';
   document.getElementById('filterCategory').value = 'all';
   document.getElementById('filterWallet').value = 'all';
   document.getElementById('searchInput').value = '';
-
-  setPresetAllTime();
+  document.getElementById('filterStartDate').value = '';
+  document.getElementById('filterEndDate').value = '';
+  applyFiltersAndRender();
 }
 
-// Ekspor ke CSV
 function triggerExportCsv() {
-  const query = buildQueryParams();
-  window.location.href = `/api/export/csv?${query}`;
+  const txs = state.transactions;
+  if (txs.length === 0) {
+    showToast('Tidak Ada Data', 'Tidak ada transaksi untuk diekspor', false);
+    return;
+  }
+  const profileName = state.currentProfile ? state.currentProfile.owner : 'Keuangan';
+  const header = 'Tanggal,Tipe,Nominal,Keterangan,Kategori,Dompet,Catatan';
+  const rows = txs.map(t => [
+    t.date,
+    t.type,
+    t.amount,
+    '"' + (t.description || '').replace(/"/g, '""') + '"',
+    '"' + (t.category || '').replace(/"/g, '""') + '"',
+    '"' + (t.wallet || '').replace(/"/g, '""') + '"',
+    '"' + (t.notes || '').replace(/"/g, '""') + '"'
+  ].join(','));
+
+  const csv = [header, ...rows].join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'keuangan-' + profileName.toLowerCase() + '-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Ekspor Berhasil', txs.length + ' transaksi ' + profileName + ' berhasil diekspor');
+}
+
+// ================= MODAL QR CODE ================= //
+
+function openQrModal() {
+  const qrImg = document.getElementById('qrCodeImage');
+  const urlLabel = document.getElementById('qrUrlLabel');
+  const directOpen = document.getElementById('btnDirectOpen');
+
+  if (qrImg) qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(GITHUB_PAGES_URL);
+  if (urlLabel) urlLabel.textContent = GITHUB_PAGES_URL;
+  if (directOpen) directOpen.href = GITHUB_PAGES_URL;
+
+  document.getElementById('modalQrCode').classList.remove('hidden');
+  lucide.createIcons();
+}
+
+function closeQrModal() {
+  document.getElementById('modalQrCode').classList.add('hidden');
 }
 
 // ================= EVENT LISTENERS ================= //
 
 function setupEventListeners() {
-  // Modal Open & Close
+  // Tombol pilihan akun di Layar Login
+  const btnSelectGhoits = document.getElementById('btnSelectGhoits');
+  const btnSelectAzzra = document.getElementById('btnSelectAzzra');
+  if (btnSelectGhoits) btnSelectGhoits.addEventListener('click', () => switchProfileWithAnimation('ghoits'));
+  if (btnSelectAzzra) btnSelectAzzra.addEventListener('click', () => switchProfileWithAnimation('azzra'));
+
+  // Tombol Ganti Akun di Navbar
+  const btnSwitchAccount = document.getElementById('btnSwitchAccount');
+  if (btnSwitchAccount) btnSwitchAccount.addEventListener('click', showLoginScreen);
+
+  // Modal Transaksi
   document.getElementById('btnOpenAddModal').addEventListener('click', openAddModal);
-  const btnFabAdd = document.getElementById('btnFabAdd');
-  if (btnFabAdd) btnFabAdd.addEventListener('click', openAddModal);
+  const btnFab = document.getElementById('btnFabAdd');
+  if (btnFab) btnFab.addEventListener('click', openAddModal);
   document.getElementById('btnEmptyAdd').addEventListener('click', openAddModal);
   document.getElementById('btnCloseModal').addEventListener('click', () => showModal(false));
   document.getElementById('btnCancelModal').addEventListener('click', () => showModal(false));
 
-  // Tipe Transaksi Toggle
   document.getElementById('btnTypeExpense').addEventListener('click', () => setTypeToggle('expense'));
   document.getElementById('btnTypeIncome').addEventListener('click', () => setTypeToggle('income'));
-
-  // Form Submit
   document.getElementById('transactionForm').addEventListener('submit', handleTransactionSubmit);
 
-  // Live Amount Preview
-  document.getElementById('txAmount').addEventListener('input', (e) => {
+  document.getElementById('txAmount').addEventListener('input', e => {
     document.getElementById('amountPreview').textContent = formatRupiah(e.target.value);
   });
 
-  // Modal Delete Events
   document.getElementById('btnCancelDelete').addEventListener('click', closeDeleteModal);
   document.getElementById('btnConfirmDelete').addEventListener('click', confirmDelete);
 
-  // Filter Events
-  document.getElementById('filterType').addEventListener('change', (e) => {
-    state.filters.type = e.target.value;
-    refreshAll();
-  });
+  document.getElementById('filterType').addEventListener('change', e => { state.filters.type = e.target.value; applyFiltersAndRender(); });
+  document.getElementById('filterCategory').addEventListener('change', e => { state.filters.category = e.target.value; applyFiltersAndRender(); });
+  document.getElementById('filterWallet').addEventListener('change', e => { state.filters.wallet = e.target.value; applyFiltersAndRender(); });
+  document.getElementById('filterStartDate').addEventListener('change', e => { state.filters.startDate = e.target.value; applyFiltersAndRender(); });
+  document.getElementById('filterEndDate').addEventListener('change', e => { state.filters.endDate = e.target.value; applyFiltersAndRender(); });
 
-  document.getElementById('filterCategory').addEventListener('change', (e) => {
-    state.filters.category = e.target.value;
-    refreshAll();
-  });
-
-  document.getElementById('filterWallet').addEventListener('change', (e) => {
-    state.filters.wallet = e.target.value;
-    refreshAll();
-  });
-
-  document.getElementById('filterStartDate').addEventListener('change', (e) => {
-    state.filters.startDate = e.target.value;
-    refreshAll();
-  });
-
-  document.getElementById('filterEndDate').addEventListener('change', (e) => {
-    state.filters.endDate = e.target.value;
-    refreshAll();
-  });
-
-  // Search Debounce (300ms)
   let searchTimer;
-  document.getElementById('searchInput').addEventListener('input', (e) => {
+  document.getElementById('searchInput').addEventListener('input', e => {
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      state.filters.search = e.target.value;
-      refreshAll();
-    }, 300);
+    searchTimer = setTimeout(() => { state.filters.search = e.target.value; applyFiltersAndRender(); }, 300);
   });
 
-  // Preset Buttons
   document.getElementById('btnPresetToday').addEventListener('click', setPresetToday);
-  document.getElementById('btnPresetThisMonth').addEventListener('click', () => {
-    setPresetThisMonth();
-    refreshAll();
-  });
+  document.getElementById('btnPresetThisMonth').addEventListener('click', () => { setPresetThisMonth(); applyFiltersAndRender(); });
   document.getElementById('btnPresetAllTime').addEventListener('click', setPresetAllTime);
   document.getElementById('btnResetFilter').addEventListener('click', resetAllFilters);
-  document.getElementById('btnRefresh').addEventListener('click', refreshAll);
-
-  // Print & Export
+  document.getElementById('btnRefresh').addEventListener('click', loadCurrentProfileData);
   document.getElementById('btnPrint').addEventListener('click', () => window.print());
   document.getElementById('btnExportCsv').addEventListener('click', triggerExportCsv);
 
-  // QR Code & Remote Access Modal
   const btnOpenQr = document.getElementById('btnOpenQrModal');
   const btnCloseQr = document.getElementById('btnCloseQrModal');
-  const tabRemote = document.getElementById('tabRemoteUrl');
-  const tabLocal = document.getElementById('tabLocalUrl');
-  const btnCopyUrl = document.getElementById('btnCopyUrl');
-  const btnCopyPass = document.getElementById('btnCopyPassword');
-
   if (btnOpenQr) btnOpenQr.addEventListener('click', openQrModal);
   if (btnCloseQr) btnCloseQr.addEventListener('click', closeQrModal);
 
-  if (tabRemote) {
-    tabRemote.addEventListener('click', () => {
-      activeQrMode = 'remote';
-      updateQrModalView();
-    });
-  }
-
-  if (tabLocal) {
-    tabLocal.addEventListener('click', () => {
-      activeQrMode = 'local';
-      updateQrModalView();
-    });
-  }
-
+  const btnCopyUrl = document.getElementById('btnCopyUrl');
   if (btnCopyUrl) {
     btnCopyUrl.addEventListener('click', () => {
-      const url = activeQrMode === 'remote' ? REMOTE_URL : LOCAL_URL;
-      navigator.clipboard.writeText(url).then(() => {
+      navigator.clipboard.writeText(GITHUB_PAGES_URL).then(() => {
         showToast('Link Disalin', 'Alamat web berhasil disalin ke clipboard');
       }).catch(() => {
-        showToast('Gagal Salin', 'Silakan salin alamat secara manual', false);
+        showToast('Gagal Salin', 'Silakan salin tautan secara manual', false);
       });
     });
   }
 
-  if (btnCopyPass) {
-    btnCopyPass.addEventListener('click', () => {
-      navigator.clipboard.writeText(TUNNEL_PASS).then(() => {
-        showToast('Password Disalin', 'Password tunnel IP berhasil disalin');
-      });
-    });
-  }
-
-  // Close modals on click outside
-  window.addEventListener('click', (e) => {
-    const modalTx = document.getElementById('modalTransaction');
-    const modalDel = document.getElementById('modalDeleteConfirm');
-    const modalQr = document.getElementById('modalQrCode');
-    if (e.target === modalTx) showModal(false);
-    if (e.target === modalDel) closeDeleteModal();
-    if (e.target === modalQr) closeQrModal();
+  window.addEventListener('click', e => {
+    if (e.target === document.getElementById('modalTransaction')) showModal(false);
+    if (e.target === document.getElementById('modalDeleteConfirm')) closeDeleteModal();
+    if (e.target === document.getElementById('modalQrCode')) closeQrModal();
   });
 
-  // Close modals on Escape key
-  window.addEventListener('keydown', (e) => {
+  window.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       showModal(false);
       closeDeleteModal();
@@ -920,52 +923,30 @@ function setupEventListeners() {
   });
 }
 
-// ================= MODAL QR CODE & REMOTE ACCESS ================= //
-const REMOTE_URL = 'https://tall-mod-barbara-cooperation.trycloudflare.com';
-const LOCAL_URL = 'http://192.168.1.17:3000';
-let activeQrMode = 'remote';
+// Inisialisasi awal saat halaman dibuka
+function init() {
+  const today = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById('txDate');
+  if (dateInput) dateInput.value = today;
 
-function updateQrModalView() {
-  const isRemote = activeQrMode === 'remote';
-  const url = isRemote ? REMOTE_URL : LOCAL_URL;
-  const qrImg = document.getElementById('qrCodeImage');
-  const urlLabel = document.getElementById('qrUrlLabel');
-  const passwordBox = document.getElementById('remotePasswordBox');
-  const directOpen = document.getElementById('btnDirectOpen');
-  const tabRemote = document.getElementById('tabRemoteUrl');
-  const tabLocal = document.getElementById('tabLocalUrl');
+  setPresetThisMonth();
+  setupEventListeners();
 
-  if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}`;
-  if (urlLabel) urlLabel.textContent = url;
-  if (directOpen) directOpen.href = url;
-
-  if (isRemote) {
-    if (passwordBox) passwordBox.classList.remove('hidden');
-    if (tabRemote) tabRemote.className = 'py-2 rounded-lg bg-white text-indigo-600 shadow-xs transition flex items-center justify-center gap-1.5 font-bold';
-    if (tabLocal) tabLocal.className = 'py-2 rounded-lg text-slate-600 hover:text-indigo-600 transition flex items-center justify-center gap-1.5 font-bold';
+  // Cek apakah user sebelumnya sudah memilih profil
+  const savedProfile = localStorage.getItem('keuangan_active_profile');
+  if (savedProfile && PROFILES[savedProfile]) {
+    applyTheme(savedProfile);
+    switchProfile(savedProfile);
   } else {
-    if (passwordBox) passwordBox.classList.add('hidden');
-    if (tabLocal) tabLocal.className = 'py-2 rounded-lg bg-white text-indigo-600 shadow-xs transition flex items-center justify-center gap-1.5 font-bold';
-    if (tabRemote) tabRemote.className = 'py-2 rounded-lg text-slate-600 hover:text-indigo-600 transition flex items-center justify-center gap-1.5 font-bold';
+    showLoginScreen();
   }
-}
 
-function openQrModal() {
-  activeQrMode = 'remote';
-  updateQrModalView();
-  const modal = document.getElementById('modalQrCode');
-  if (modal) modal.classList.remove('hidden');
   lucide.createIcons();
 }
 
-function closeQrModal() {
-  const modal = document.getElementById('modalQrCode');
-  if (modal) modal.classList.add('hidden');
-}
-
-// Expose functions globally for inline HTML onclick handlers
 window.openEditModal = openEditModal;
 window.openDeleteModal = openDeleteModal;
+window.switchProfile = switchProfile;
+window.showLoginScreen = showLoginScreen;
 
-// Jalankan inisialisasi saat DOM siap
 document.addEventListener('DOMContentLoaded', init);
