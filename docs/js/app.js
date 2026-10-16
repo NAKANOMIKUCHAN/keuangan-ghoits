@@ -1,14 +1,19 @@
 
-// ================= SISTEM LAGU SENDIRI KHUSUS GHOITS ================= //
+// ================= SISTEM LAGU SLIPKNOT - WAIT AND BLEED (GHOITS) ================= //
+const SLIPKNOT_DEFAULT_SONG = {
+  url: 'https://archive.org/download/soundcloud-52717042/52717042.mp3',
+  name: 'Wait and Bleed - Slipknot'
+};
+
 const DB_MUSIC_NAME = 'KeuanganGhoitsMusicDB';
 const DB_MUSIC_STORE = 'custom_audio';
 
 let customAudioBlob = null;
-let customAudioName = '';
+let customAudioUrl = SLIPKNOT_DEFAULT_SONG.url;
+let customAudioName = SLIPKNOT_DEFAULT_SONG.name;
 let isMusicPlaying = false;
 let audioInstance = null;
 
-// IndexedDB Helper untuk menyimpan file lagu MP3 user di browser HP
 function openMusicDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_MUSIC_NAME, 1);
@@ -62,7 +67,6 @@ async function initMusicSystem() {
   audioInstance.volume = 0.65;
   audioInstance.loop = true;
 
-  // Event listener selesai lagu jika tidak loop
   audioInstance.addEventListener('ended', () => {
     isMusicPlaying = false;
     updateMusicButtonUI();
@@ -82,45 +86,43 @@ async function initMusicSystem() {
     fileInput.addEventListener('change', handleAudioFileSelected);
   }
 
-  // Load lagu yang sebelumnya sudah pernah di-upload di Ghoits
+  // Cek apakah ada audio custom user, jika tidak gunakan Slipknot - Wait and Bleed
   const saved = await loadAudioFromIndexedDB();
   if (saved && saved.blob) {
     customAudioBlob = saved.blob;
     customAudioName = saved.name || 'Lagu Saya';
-    setAudioSource(saved.blob);
-    updateMusicButtonUI();
+    customAudioUrl = URL.createObjectURL(saved.blob);
+  } else {
+    customAudioBlob = null;
+    customAudioName = SLIPKNOT_DEFAULT_SONG.name;
+    customAudioUrl = SLIPKNOT_DEFAULT_SONG.url;
   }
-}
 
-function setAudioSource(blob) {
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
-  if (!audioInstance) return;
-
-  const url = URL.createObjectURL(blob);
-  audioInstance.src = url;
+  audioInstance.src = customAudioUrl;
   audioInstance.load();
+  updateMusicButtonUI();
 }
 
 function handleMusicPlayClick() {
-  const fileInput = document.getElementById('inputCustomAudio');
+  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
+  if (!audioInstance) return;
 
-  // Jika belum ada lagu, buka file picker
-  if (!customAudioBlob || !audioInstance || !audioInstance.src) {
-    if (fileInput) fileInput.click();
-    return;
+  if (!audioInstance.src || audioInstance.src === '') {
+    audioInstance.src = customAudioUrl;
+    audioInstance.load();
   }
 
   if (isMusicPlaying) {
     audioInstance.pause();
     isMusicPlaying = false;
-    showToast('Musik Dijeda', 'Musik lagu dijeda', true);
+    showToast('Musik Dijeda', 'Wait and Bleed dijeda', true);
   } else {
     audioInstance.play().then(() => {
       isMusicPlaying = true;
-      showToast('Memutar Lagu', customAudioName, true);
+      showToast('Memutar Lagu 🤘', customAudioName, true);
     }).catch(e => {
-      console.error(e);
-      showToast('Gagal Memutar', 'Klik lagi untuk memutar lagu', false);
+      console.warn(e);
+      showToast('Klik Sekali Lagi', 'Izin audio browser diperlukan', false);
     });
   }
   updateMusicButtonUI();
@@ -131,17 +133,20 @@ async function handleAudioFileSelected(e) {
   if (!file) return;
 
   customAudioBlob = file;
-  customAudioName = file.name.replace(/\.[^/.]+$/, ''); // Hapus ekstensi
-  setAudioSource(file);
+  customAudioName = file.name.replace(/\.[^/.]+$/, '');
+  customAudioUrl = URL.createObjectURL(file);
+
+  if (audioInstance) {
+    audioInstance.src = customAudioUrl;
+    audioInstance.load();
+    audioInstance.play().then(() => {
+      isMusicPlaying = true;
+      updateMusicButtonUI();
+    }).catch(err => console.warn(err));
+  }
+
   await saveAudioToIndexedDB(file);
-
-  showToast('Lagu Tersimpan', 'Memutar ' + customAudioName, true);
-
-  audioInstance.play().then(() => {
-    isMusicPlaying = true;
-    updateMusicButtonUI();
-  }).catch(err => console.warn(err));
-
+  showToast('Lagu Disimpan', customAudioName, true);
   updateMusicButtonUI();
 }
 
@@ -149,7 +154,6 @@ function updateMusicVisibility() {
   const container = document.getElementById('ghoitsMusicContainer');
   if (!container) return;
 
-  // HANYA MUNCUL DI GHOITS, DI AZZRA TIDAK ADA LAGU
   if (state.currentProfile && state.currentProfile.id === 'ghoits') {
     container.classList.remove('hidden');
     container.classList.add('flex');
@@ -171,15 +175,8 @@ function updateMusicButtonUI() {
 
   if (!btn) return;
 
-  if (!customAudioBlob) {
-    if (text) text.textContent = 'Pilih Lagu';
-    btn.classList.remove('playing');
-    if (icon) icon.className = 'w-4 h-4 text-slate-500';
-    return;
-  }
-
   if (text) {
-    text.textContent = customAudioName || 'Lagu Saya';
+    text.textContent = customAudioName || 'Wait and Bleed';
   }
 
   if (isMusicPlaying) {
