@@ -129,29 +129,7 @@ function showLoginScreen() {
 }
 
 function updateLoginPreviewCards() {
-  // Hitung saldo Ghoits
-  try {
-    const rawG = localStorage.getItem(PROFILES.ghoits.storageKey);
-    const dbG = rawG ? JSON.parse(rawG) : GHOITS_INITIAL;
-    const balG = (dbG.transactions || []).reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
-    const countG = (dbG.transactions || []).length;
-    const elBalG = document.getElementById('loginBalGhoits');
-    const elCntG = document.getElementById('loginCntGhoits');
-    if (elBalG) elBalG.textContent = formatRupiah(balG);
-    if (elCntG) elCntG.textContent = countG + ' transaksi tersimpan';
-  } catch (e) {}
-
-  // Hitung saldo Azzra
-  try {
-    const rawA = localStorage.getItem(PROFILES.azzra.storageKey);
-    const dbA = rawA ? JSON.parse(rawA) : AZZRA_INITIAL;
-    const balA = (dbA.transactions || []).reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
-    const countA = (dbA.transactions || []).length;
-    const elBalA = document.getElementById('loginBalAzzra');
-    const elCntA = document.getElementById('loginCntAzzra');
-    if (elBalA) elBalA.textContent = formatRupiah(balA);
-    if (elCntA) elCntA.textContent = countA + ' transaksi tersimpan';
-  } catch (e) {}
+  // Detail saldo disembunyikan agar tampilan login bersih dan minimalis (hanya avatar & nama)
 }
 
 function loadCurrentProfileData() {

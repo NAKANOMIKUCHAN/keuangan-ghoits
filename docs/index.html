@@ -53,100 +53,61 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
-  <!-- ================= SCREEN 1: LOGIN / PILIH AKUN ================= -->
-  <div id="loginScreen" class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-indigo-50/40 to-slate-100">
-    <div class="max-w-xl w-full space-y-6 sm:space-y-8 my-auto py-8">
+  <!-- ================= SCREEN 1: LOGIN / PILIH AKUN (MINIMALIS & ANIMATED) ================= -->
+  <div id="loginScreen" class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white relative overflow-hidden select-none">
+    
+    <!-- Ambient Background Glow Effects -->
+    <div class="absolute -top-32 -left-32 w-80 h-80 sm:w-96 sm:h-96 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -right-32 w-80 h-80 sm:w-96 sm:h-96 rounded-full bg-rose-500/20 blur-3xl pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-lg w-full flex flex-col items-center justify-center space-y-10 sm:space-y-14 my-auto py-10 anim-pop-in">
       
-      <!-- Brand & Header -->
-      <div class="text-center space-y-2 sm:space-y-3">
-        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 ring-4 ring-indigo-500/20 transform hover:scale-105 transition">
-          <i data-lucide="wallet-cards" class="w-8 h-8 sm:w-10 sm:h-10"></i>
-        </div>
-        <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-800 bg-clip-text text-transparent">
-          Portal Keuangan
+      <!-- Judul Elegan -->
+      <div class="text-center space-y-2">
+        <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
+          Siapa yang mencatat?
         </h1>
-        <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-          Silakan pilih akun keuangan yang ingin Anda buka dan kelola:
+        <p class="text-xs sm:text-sm text-slate-400 font-medium">
+          Pilih profil Anda untuk mulai mengelola keuangan
         </p>
       </div>
 
-      <!-- Kartu Pilihan Akun (Grid 2 Kolom) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Pilihan Profil: Hanya Foto/Avatar + Nama Saja (Tanpa Detail) -->
+      <div class="flex items-center justify-center gap-8 sm:gap-16 w-full">
         
-        <!-- Pilihan 1: Keuangan Ghoits -->
-        <div id="btnSelectGhoits" class="group relative bg-white p-5 sm:p-6 rounded-2xl border-2 border-indigo-200/80 hover:border-indigo-600 shadow-sm hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1 active:scale-95 flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition">
-                <i data-lucide="user" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase tracking-wider">
-                Profil 1
-              </span>
-            </div>
-            <div>
-              <h2 class="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition">
-                Keuangan Ghoits
-              </h2>
-              <p class="text-xs text-slate-500 mt-0.5">
-                Pencatatan keuangan pribadi Ghoits
-              </p>
-            </div>
-            <!-- Info Saldo Singkat -->
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-0.5">
-              <span class="text-[10px] text-slate-400 font-semibold uppercase">Total Saldo:</span>
-              <p id="loginBalGhoits" class="text-base font-extrabold text-slate-800 truncate">Rp 1.335.000</p>
-              <p id="loginCntGhoits" class="text-[10px] text-slate-400">Tersimpan di perangkat</p>
+        <!-- PROFIL 1: GHOITS -->
+        <div id="btnSelectGhoits" class="profile-card-ghoits anim-float-ghoits group flex flex-col items-center cursor-pointer transition transform focus:outline-none" role="button" tabindex="0">
+          <!-- Lingkaran Avatar Besar Beranimasi -->
+          <div class="profile-avatar-ghoits w-24 h-24 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center shadow-xl">
+            <div class="w-full h-full rounded-full bg-slate-900 flex flex-col items-center justify-center text-white relative overflow-hidden group-hover:bg-indigo-900/60 transition">
+              <i data-lucide="user" class="w-10 h-10 sm:w-14 sm:h-14 text-indigo-400 group-hover:text-white group-hover:scale-110 transition duration-300"></i>
             </div>
           </div>
-
-          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600 group-hover:translate-x-0.5 transition">
-            <span>Masuk ke Akun Ghoits</span>
-            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-          </div>
-          <div class="absolute inset-x-0 bottom-0 h-1 rounded-b-2xl bg-indigo-600 opacity-0 group-hover:opacity-100 transition"></div>
+          <!-- Nama Saja -->
+          <span class="mt-3.5 sm:mt-4 text-base sm:text-xl font-bold tracking-wide text-slate-300 group-hover:text-indigo-400 group-hover:scale-105 transition duration-300">
+            Ghoits
+          </span>
         </div>
 
-        <!-- Pilihan 2: Keuangan Azzra -->
-        <div id="btnSelectAzzra" class="group relative bg-white p-5 sm:p-6 rounded-2xl border-2 border-rose-200/80 hover:border-rose-500 shadow-sm hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1 active:scale-95 flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition">
-                <i data-lucide="sparkles" class="w-6 h-6"></i>
-              </div>
-              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wider">
-                Profil 2
-              </span>
-            </div>
-            <div>
-              <h2 class="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-rose-600 transition">
-                Keuangan Azzra
-              </h2>
-              <p class="text-xs text-slate-500 mt-0.5">
-                Pencatatan keuangan pribadi Azzra
-              </p>
-            </div>
-            <!-- Info Saldo Singkat -->
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-0.5">
-              <span class="text-[10px] text-slate-400 font-semibold uppercase">Total Saldo:</span>
-              <p id="loginBalAzzra" class="text-base font-extrabold text-slate-800 truncate">Rp 1.500.000</p>
-              <p id="loginCntAzzra" class="text-[10px] text-slate-400">Tersimpan di perangkat</p>
+        <!-- PROFIL 2: AZZRA -->
+        <div id="btnSelectAzzra" class="profile-card-azzra anim-float-azzra group flex flex-col items-center cursor-pointer transition transform focus:outline-none" role="button" tabindex="0">
+          <!-- Lingkaran Avatar Besar Beranimasi -->
+          <div class="profile-avatar-azzra w-24 h-24 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-rose-500 via-pink-500 to-amber-400 flex items-center justify-center shadow-xl">
+            <div class="w-full h-full rounded-full bg-slate-900 flex flex-col items-center justify-center text-white relative overflow-hidden group-hover:bg-rose-900/60 transition">
+              <i data-lucide="sparkles" class="w-10 h-10 sm:w-14 sm:h-14 text-rose-400 group-hover:text-white group-hover:scale-110 transition duration-300"></i>
             </div>
           </div>
-
-          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600 group-hover:translate-x-0.5 transition">
-            <span>Masuk ke Akun Azzra</span>
-            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-          </div>
-          <div class="absolute inset-x-0 bottom-0 h-1 rounded-b-2xl bg-rose-500 opacity-0 group-hover:opacity-100 transition"></div>
+          <!-- Nama Saja -->
+          <span class="mt-3.5 sm:mt-4 text-base sm:text-xl font-bold tracking-wide text-slate-300 group-hover:text-rose-400 group-hover:scale-105 transition duration-300">
+            Azzra
+          </span>
         </div>
 
       </div>
 
-      <!-- Footer Info Login -->
-      <div class="text-center text-xs text-slate-400 space-y-1 pt-2">
-        <p class="font-medium text-slate-500">Data Ghoits &amp; Azzra tersimpan aman secara terpisah</p>
-        <p class="text-[11px] text-slate-400">100% Bebas Server • Aktif 24 Jam Nonstop di GitHub Pages</p>
+      <!-- Footer Minimalis -->
+      <div class="pt-6 text-center text-[11px] text-slate-500 font-medium">
+        <span>Keuangan Ghoits &amp; Azzra &bull; 100% Bebas Server</span>
       </div>
 
     </div>
