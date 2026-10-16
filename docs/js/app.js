@@ -1,7 +1,7 @@
 
 // ================= SISTEM LAGU SLIPKNOT - WAIT AND BLEED (GHOITS) ================= //
 const SLIPKNOT_DEFAULT_SONG = {
-  url: 'https://archive.org/download/soundcloud-52717042/52717042.mp3',
+  url: 'audio/wait-and-bleed.mp3',
   name: 'Wait and Bleed - Slipknot'
 };
 
@@ -103,29 +103,61 @@ async function initMusicSystem() {
   updateMusicButtonUI();
 }
 
+
+let audioUnlocked = false;
+
+function unlockAudioPolicy() {
+  if (audioUnlocked) return;
+  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
+  if (audioInstance) {
+    audioUnlocked = true;
+    // Buka kunci browser audio policy dengan play silent
+    const prevMuted = audioInstance.muted;
+    audioInstance.muted = true;
+    audioInstance.play().then(() => {
+      audioInstance.pause();
+      audioInstance.muted = prevMuted;
+    }).catch(() => {});
+  }
+}
+
+// Buka kunci audio saat ada interaksi pertama di halaman
+window.addEventListener('click', unlockAudioPolicy, { once: true });
+window.addEventListener('touchstart', unlockAudioPolicy, { once: true });
+
 function handleMusicPlayClick() {
   if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
   if (!audioInstance) return;
 
-  if (!audioInstance.src || audioInstance.src === '') {
-    audioInstance.src = customAudioUrl;
-    audioInstance.load();
+  if (!audioInstance.src || audioInstance.src === '' || audioInstance.src.endsWith('/')) {
+    audioInstance.src = customAudioUrl || 'audio/wait-and-bleed.mp3';
   }
 
   if (isMusicPlaying) {
     audioInstance.pause();
     isMusicPlaying = false;
-    showToast('Musik Dijeda', 'Wait and Bleed dijeda', true);
+    showToast('Musik Dijeda', customAudioName, true);
+    updateMusicButtonUI();
   } else {
-    audioInstance.play().then(() => {
-      isMusicPlaying = true;
-      showToast('Memutar Lagu 🤘', customAudioName, true);
-    }).catch(e => {
-      console.warn(e);
-      showToast('Klik Sekali Lagi', 'Izin audio browser diperlukan', false);
-    });
+    // Mulai memutar musik tanpa error izin
+    const playPromise = audioInstance.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        isMusicPlaying = true;
+        showToast('Memutar Lagu 🤘', customAudioName, true);
+        updateMusicButtonUI();
+      }).catch(err => {
+        console.warn('Play retry:', err);
+        // Retry otomatis setelah jeda singkat tanpa menampilkan popup error
+        setTimeout(() => {
+          audioInstance.play().then(() => {
+            isMusicPlaying = true;
+            updateMusicButtonUI();
+          }).catch(() => {});
+        }, 150);
+      });
+    }
   }
-  updateMusicButtonUI();
 }
 
 async function handleAudioFileSelected(e) {
@@ -288,6 +320,7 @@ function saveProfileData(data) {
 let isTransitioning = false;
 
 function switchProfileWithAnimation(profileId) {
+  unlockAudioPolicy();
   if (isTransitioning) return;
   isTransitioning = true;
 
