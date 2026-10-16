@@ -1,3 +1,101 @@
+
+// ================= AUDIO & BGM PLAYLIST SYSTEM ================= //
+const BGM_TRACKS = {
+  ghoits: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3', // Chill Lofi Study Beat
+  azzra: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=sweet-love-10928.mp3'    // Sweet Romantic Cozy Piano
+};
+
+let isMusicPlaying = false;
+let audioInstance = null;
+
+function initMusicSystem() {
+  audioInstance = document.getElementById('bgmAudio');
+  if (!audioInstance) return;
+
+  audioInstance.volume = 0.45; // Volume santai dan pas
+
+  const btnToggle = document.getElementById('btnToggleMusic');
+  if (btnToggle) {
+    btnToggle.addEventListener('click', toggleMusic);
+  }
+}
+
+function playProfileMusic(profileId) {
+  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
+  if (!audioInstance) return;
+
+  const trackUrl = BGM_TRACKS[profileId] || BGM_TRACKS.ghoits;
+
+  // Jika lagu berubah
+  if (audioInstance.src !== trackUrl) {
+    audioInstance.src = trackUrl;
+    audioInstance.load();
+  }
+
+  audioInstance.play().then(() => {
+    isMusicPlaying = true;
+    updateMusicButtonUI();
+  }).catch((err) => {
+    console.warn('Autoplay tertahan kebijakan browser, menunggu klik:', err);
+    isMusicPlaying = false;
+    updateMusicButtonUI();
+  });
+}
+
+function stopMusic() {
+  if (audioInstance) {
+    audioInstance.pause();
+    isMusicPlaying = false;
+    updateMusicButtonUI();
+  }
+}
+
+function toggleMusic() {
+  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
+  if (!audioInstance) return;
+
+  if (isMusicPlaying) {
+    audioInstance.pause();
+    isMusicPlaying = false;
+    showToast('Musik Jeda', 'Musik latar dinonaktifkan', true);
+  } else {
+    // Pastikan src sudah diset sesuai profil aktif
+    const activeProfile = state.currentProfile ? state.currentProfile.id : 'ghoits';
+    if (!audioInstance.src || !audioInstance.src.includes('.mp3')) {
+      audioInstance.src = BGM_TRACKS[activeProfile] || BGM_TRACKS.ghoits;
+      audioInstance.load();
+    }
+    audioInstance.play().then(() => {
+      isMusicPlaying = true;
+      showToast('Musik Aktif', 'Memutar musik santai ' + (state.currentProfile ? state.currentProfile.owner : ''), true);
+    }).catch(e => console.error(e));
+  }
+  updateMusicButtonUI();
+}
+
+function updateMusicButtonUI() {
+  const btn = document.getElementById('btnToggleMusic');
+  const icon = document.getElementById('musicIcon');
+  const text = document.getElementById('musicText');
+
+  if (!btn) return;
+
+  if (isMusicPlaying) {
+    btn.classList.add('playing');
+    if (text) text.textContent = 'Musik: On';
+    if (icon) {
+      icon.className = 'w-4 h-4 text-indigo-600 animate-pulse';
+    }
+  } else {
+    btn.classList.remove('playing');
+    if (text) text.textContent = 'Musik: Off';
+    if (icon) {
+      icon.className = 'w-4 h-4 text-slate-500';
+    }
+  }
+  lucide.createIcons();
+}
+
 /**
  * Keuangan Ghoits & Azzra - Multi-Profile LocalStorage Edition
  * 100% Bebas Server & Bebas Token, Aktif 24 Jam di GitHub Pages.
@@ -187,11 +285,13 @@ function switchProfile(profileId) {
 
   // Load data profil
   loadCurrentProfileData();
+  playProfileMusic(profileId);
   lucide.createIcons();
 }
 
 
 function showLoginScreen() {
+  stopMusic();
   document.body.classList.remove('theme-ghoits', 'theme-azzra');
   state.currentProfile = null;
   localStorage.removeItem('keuangan_active_profile');
@@ -931,6 +1031,7 @@ function init() {
 
   setPresetThisMonth();
   setupEventListeners();
+  initMusicSystem();
 
   // Cek apakah user sebelumnya sudah memilih profil
   const savedProfile = localStorage.getItem('keuangan_active_profile');
