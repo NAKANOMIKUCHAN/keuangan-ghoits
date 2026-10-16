@@ -120,12 +120,13 @@ async function saveToCloudDatabase(fullDb) {
 
 // ================= SISTEM LAGU DUAL PROFILE (GHOITS & AZZRA) ================= //
 
-function getAbsoluteAudioUrl(relativePath) {
-  try {
-    return new URL(relativePath, window.location.href).href;
-  } catch (e) {
-    return relativePath;
+function getAudioUrl(filename) {
+  if (window.location.hostname && window.location.hostname.includes('github.io')) {
+    return 'https://' + window.location.hostname + '/keuangan-ghoits/audio/' + filename;
   }
+  const href = window.location.href.split('?')[0].split('#')[0];
+  const base = href.substring(0, href.lastIndexOf('/') + 1);
+  return base + 'audio/' + filename;
 }
 
 const PLAYLISTS = {
@@ -133,17 +134,17 @@ const PLAYLISTS = {
     title: 'Lagu Ghoits (Slipknot)',
     theme: 'blue',
     tracks: [
-      { id: 'wait_and_bleed', name: 'Wait & Bleed', subtitle: 'Slipknot (1999)', emoji: '🤘', url: getAbsoluteAudioUrl('audio/wait-and-bleed.mp3') },
-      { id: 'nero_forte', name: 'Nero Forte', subtitle: 'Slipknot (We Are Not Your Kind)', emoji: '🔥', url: getAbsoluteAudioUrl('audio/wait-and-bleed.mp3') }
+      { id: 'wait_and_bleed', name: 'Wait & Bleed', subtitle: 'Slipknot (1999)', emoji: '🤘', url: getAudioUrl('wait-and-bleed.mp3') },
+      { id: 'nero_forte', name: 'Nero Forte', subtitle: 'Slipknot (2019)', emoji: '🔥', url: getAudioUrl('wait-and-bleed.mp3') }
     ]
   },
   azzra: {
     title: 'Lagu Azzra (Indie Pop)',
     theme: 'pink',
     tracks: [
-      { id: 'runtuh', name: 'Runtuh', subtitle: 'Feby Putri ft. Fiersa Besari', emoji: '🌸', url: getAbsoluteAudioUrl('audio/runtuh.mp3') },
-      { id: 'taruh', name: 'Taruh', subtitle: 'Nadin Amizah', emoji: '✨', url: getAbsoluteAudioUrl('audio/runtuh.mp3') },
-      { id: 'berakhir_di_aku', name: 'Berakhir di Aku', subtitle: 'Idgitaf (Home Sweet Loan)', emoji: '🕊️', url: getAbsoluteAudioUrl('audio/runtuh.mp3') }
+      { id: 'runtuh', name: 'Runtuh', subtitle: 'Feby Putri ft. Fiersa Besari', emoji: '🌸', url: getAudioUrl('runtuh.mp3') },
+      { id: 'taruh', name: 'Taruh', subtitle: 'Nadin Amizah', emoji: '✨', url: getAudioUrl('runtuh.mp3') },
+      { id: 'berakhir_di_aku', name: 'Berakhir di Aku', subtitle: 'Idgitaf', emoji: '🕊️', url: getAudioUrl('runtuh.mp3') }
     ]
   }
 };
@@ -152,30 +153,21 @@ let currentTrackId = null;
 let customUserTracks = {};
 let isMusicPlaying = false;
 let audioInstance = null;
-let audioUnlocked = false;
 
-function unlockAudioPolicy() {
-  if (audioUnlocked) return;
+function ensureAudioReady() {
   if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
   if (audioInstance) {
-    audioUnlocked = true;
-    const prevMuted = audioInstance.muted;
-    audioInstance.muted = true;
-    audioInstance.play().then(() => {
-      audioInstance.pause();
-      audioInstance.muted = prevMuted;
-    }).catch(() => {});
+    audioInstance.muted = false;
+    audioInstance.volume = 0.8;
   }
+  return audioInstance;
 }
-
-window.addEventListener('click', unlockAudioPolicy, { once: true });
-window.addEventListener('touchstart', unlockAudioPolicy, { once: true });
 
 function initMusicSystem() {
   audioInstance = document.getElementById('bgmAudio');
   if (!audioInstance) return;
 
-  audioInstance.volume = 0.7;
+  ensureAudioReady();
   audioInstance.loop = true;
 
   const btnPlay = document.getElementById('btnPlayMusic');
@@ -183,10 +175,32 @@ function initMusicSystem() {
   const btnCloseModal = document.getElementById('btnCloseTrackModal');
   const fileInput = document.getElementById('inputCustomAudio');
 
-  if (btnPlay) btnPlay.addEventListener('click', handleMusicPlayClick);
-  if (btnOpenModal) btnOpenModal.addEventListener('click', openTrackModal);
-  if (btnCloseModal) btnCloseModal.addEventListener('click', closeTrackModal);
-  if (fileInput) fileInput.addEventListener('change', handleAudioFileSelected);
+  if (btnPlay) {
+    btnPlay.onclick = handleMusicPlayClick;
+  }
+  if (btnOpenModal) {
+    btnOpenModal.onclick = openTrackModal;
+  }
+  if (btnCloseModal) {
+    btnCloseModal.onclick = closeTrackModal;
+  }
+  if (fileInput) {
+    fileInput.onchange = handleAudioFileSelected;
+  }
+
+  audioInstance.onplay = () => {
+    isMusicPlaying = true;
+    updateMusicButtonUI();
+  };
+  audioInstance.onpause = () => {
+    isMusicPlaying = false;
+    updateMusicButtonUI();
+  };
+  audioInstance.onerror = (e) => {
+    console.warn('Audio element error:', e);
+    isMusicPlaying = false;
+    updateMusicButtonUI();
+  };
 
   updateMusicForActiveProfile();
 }
@@ -195,18 +209,16 @@ function updateMusicForActiveProfile() {
   const profileId = state.currentProfile ? state.currentProfile.id : 'ghoits';
   const playlist = PLAYLISTS[profileId] || PLAYLISTS.ghoits;
 
-  // Baca lagu yang tersimpan per profil
   const savedKey = profileId + '_active_track';
   const savedTrackId = localStorage.getItem(savedKey) || playlist.tracks[0].id;
   currentTrackId = savedTrackId;
 
-  // Update URL audio
   setAudioTrackSource(profileId, savedTrackId);
   updateMusicButtonUI();
 }
 
 function setAudioTrackSource(profileId, trackId) {
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
+  ensureAudioReady();
   if (!audioInstance) return;
 
   const playlist = PLAYLISTS[profileId] || PLAYLISTS.ghoits;
@@ -219,7 +231,9 @@ function setAudioTrackSource(profileId, trackId) {
     targetUrl = found ? found.url : playlist.tracks[0].url;
   }
 
-  audioInstance.src = targetUrl;
+  if (targetUrl && audioInstance.src !== targetUrl) {
+    audioInstance.src = targetUrl;
+  }
 }
 
 function openTrackModal() {
@@ -244,7 +258,6 @@ function openTrackModal() {
     iconBox.className = 'w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center';
   }
 
-  // Render opsi lagu
   container.innerHTML = playlist.tracks.map(t => {
     const isSelected = currentTrackId === t.id;
     const activeBorder = isSelected ? (isAzzra ? 'border-rose-500 bg-rose-50/60' : 'border-blue-500 bg-blue-50/60') : 'border-slate-200 hover:bg-slate-50';
@@ -285,22 +298,24 @@ function closeTrackModal() {
 }
 
 function handleTrackSelect(trackId, trackName) {
+  ensureAudioReady();
   const profileId = state.currentProfile ? state.currentProfile.id : 'ghoits';
   currentTrackId = trackId;
   localStorage.setItem(profileId + '_active_track', trackId);
 
   setAudioTrackSource(profileId, trackId);
+  closeTrackModal();
 
   if (audioInstance) {
+    audioInstance.muted = false;
+    audioInstance.volume = 0.8;
     audioInstance.play().then(() => {
-      isMusicPlaying = true;
       showToast('Memutar Lagu 🎵', trackName, true);
-      updateMusicButtonUI();
-    }).catch(err => console.warn('Play error:', err));
+    }).catch(err => {
+      console.warn('Track select play error:', err);
+      showToast('Lagu Dipilih', trackName + ' (Ketuk Play)', true);
+    });
   }
-
-  closeTrackModal();
-  updateMusicButtonUI();
 }
 
 function handleCustomUploadClick() {
@@ -313,6 +328,7 @@ function handleAudioFileSelected(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
 
+  ensureAudioReady();
   const profileId = state.currentProfile ? state.currentProfile.id : 'ghoits';
   const url = URL.createObjectURL(file);
   const songName = file.name.replace(/\.[^/.]+$/, '');
@@ -321,13 +337,12 @@ function handleAudioFileSelected(e) {
   currentTrackId = 'custom';
   localStorage.setItem(profileId + '_active_track', 'custom');
 
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
   if (audioInstance) {
     audioInstance.src = url;
+    audioInstance.muted = false;
+    audioInstance.volume = 0.8;
     audioInstance.play().then(() => {
-      isMusicPlaying = true;
       showToast('Memutar Lagu dari HP 🎵', songName, true);
-      updateMusicButtonUI();
     }).catch(err => console.warn(err));
   }
 
@@ -335,37 +350,39 @@ function handleAudioFileSelected(e) {
 }
 
 function handleMusicPlayClick(e) {
-  if (e) e.stopPropagation();
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
 
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
+  ensureAudioReady();
   if (!audioInstance) return;
 
   const profileId = state.currentProfile ? state.currentProfile.id : 'ghoits';
 
-  if (!audioInstance.src || audioInstance.src === '' || audioInstance.src.endsWith('/')) {
+  if (!audioInstance.src || audioInstance.src === '' || audioInstance.src === window.location.href) {
     setAudioTrackSource(profileId, currentTrackId);
   }
 
-  if (isMusicPlaying) {
+  if (!audioInstance.paused && isMusicPlaying) {
     audioInstance.pause();
-    isMusicPlaying = false;
-    showToast('Musik Dijeda', getCurrentTrackTitle(), true);
-    updateMusicButtonUI();
+    showToast('Musik Dijeda ⏸', getCurrentTrackTitle(), true);
   } else {
+    audioInstance.muted = false;
+    audioInstance.volume = 0.8;
     const playPromise = audioInstance.play();
     if (playPromise !== undefined) {
       playPromise.then(() => {
-        isMusicPlaying = true;
         showToast('Memutar Lagu 🎵', getCurrentTrackTitle(), true);
-        updateMusicButtonUI();
       }).catch(err => {
-        console.warn('Audio play error:', err);
-        setTimeout(() => {
-          audioInstance.play().then(() => {
-            isMusicPlaying = true;
-            updateMusicButtonUI();
-          }).catch(() => {});
-        }, 100);
+        console.warn('Playback error:', err);
+        setAudioTrackSource(profileId, currentTrackId);
+        audioInstance.play().then(() => {
+          showToast('Memutar Lagu 🎵', getCurrentTrackTitle(), true);
+        }).catch(err2 => {
+          console.error('Final play error:', err2);
+          showToast('Ketuk Sekali Lagi', 'Browser HP perlu izin untuk memutar lagu', false);
+        });
       });
     }
   }
@@ -393,7 +410,6 @@ function updateMusicButtonUI() {
   const profileId = state.currentProfile ? state.currentProfile.id : 'ghoits';
   const isAzzra = profileId === 'azzra';
 
-  // Tema warna tombol
   if (isAzzra) {
     btn.className = isMusicPlaying 
       ? 'theme-music-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-semibold rounded-xl transition shadow-xs active:scale-95 bg-rose-700 text-white'
@@ -558,7 +574,7 @@ document.addEventListener('visibilitychange', () => {
 let isTransitioning = false;
 
 function switchProfileWithAnimation(profileId) {
-  unlockAudioPolicy();
+  ensureAudioReady();
   if (isTransitioning) return;
   isTransitioning = true;
 
@@ -1312,13 +1328,9 @@ function setupEventListeners() {
   const btnSelectAzzra = document.getElementById('btnSelectAzzra');
   if (btnSelectGhoits) btnSelectGhoits.addEventListener('click', () => switchProfileWithAnimation('ghoits'));
   if (btnSelectAzzra) btnSelectAzzra.addEventListener('click', () => switchProfileWithAnimation('azzra'));
-  // Mobile touch support untuk tombol profil (penting untuk iOS/Android)
-  if (btnSelectGhoits) {
-    btnSelectGhoits.addEventListener('touchstart', (e) => { e.preventDefault(); switchProfileWithAnimation('ghoits'); }, { passive: false });
-  }
-  if (btnSelectAzzra) {
-    btnSelectAzzra.addEventListener('touchstart', (e) => { e.preventDefault(); switchProfileWithAnimation('azzra'); }, { passive: false });
-  }
+  // Click listeners untuk profil (berlaku untuk laptop dan mobile HP)
+  if (btnSelectGhoits) btnSelectGhoits.onclick = () => switchProfileWithAnimation('ghoits');
+  if (btnSelectAzzra) btnSelectAzzra.onclick = () => switchProfileWithAnimation('azzra');
 
   // Tombol Ganti Akun di Navbar
   const btnSwitchAccount = document.getElementById('btnSwitchAccount');
