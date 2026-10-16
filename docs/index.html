@@ -158,42 +158,20 @@
             </button>
 
             
-            <!-- Tombol Musik Khusus Ghoits (Lagu Sendiri) -->
-            <!-- Tombol Musik Khusus Ghoits (Wait and Bleed & Nero Forte) -->
-            <!-- Tombol Musik Khusus Ghoits (Wait and Bleed & Nero Forte) -->
-            <div id="ghoitsMusicContainer" class="hidden items-center gap-1.5">
+            <!-- Pemutar Musik Khusus Ghoits (Wait and Bleed & Nero Forte) -->
+            <div id="ghoitsMusicContainer" class="hidden items-center gap-1 sm:gap-1.5">
               <input type="file" id="inputCustomAudio" accept="audio/*" class="hidden">
               
-              <!-- Dropdown Pilihan Lagu Slipknot -->
-              <div class="relative flex items-center">
-                <select id="selectSlipknotTrack" class="text-xs font-semibold py-1.5 sm:py-2 pl-2 sm:pl-3 pr-6 bg-slate-800 text-white border border-slate-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-xs">
-                  <option value="wait_and_bleed">🤘 Wait and Bleed</option>
-                  <option value="nero_forte">🔥 Nero Forte</option>
-                  <option value="custom">📁 Lagu Sendiri...</option>
-                </select>
-              </div>
-
-              <!-- Tombol Play / Pause -->
+              <!-- Tombol Play / Pause Utama -->
               <button id="btnPlayCustomMusic" title="Putar / Jeda Lagu" class="theme-music-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-semibold rounded-xl transition shadow-xs active:scale-95 bg-blue-600 hover:bg-blue-700 text-white">
                 <i data-lucide="play" id="musicIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white"></i>
-                <span id="musicText" class="hidden sm:inline text-xs font-semibold">Play</span>
+                <span id="musicText" class="max-w-[90px] sm:max-w-[130px] truncate text-xs font-semibold">Wait &amp; Bleed</span>
               </button>
-            </div>
-    </header>
 
-    <!-- MAIN DASHBOARD CONTENT -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8">
-
-      <!-- Section 1: Financial Summary Cards -->
-      <section>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-5">
-          <!-- Saldo Bersih Card -->
-          <div class="relative overflow-hidden bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition group">
-            <div class="flex items-center justify-between mb-2 sm:mb-3">
-              <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Saldo Bersih</span>
-              <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center theme-balance-icon">
-                <i data-lucide="scale" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-              </div>
+              <!-- Tombol Ganti Lagu -->
+              <button id="btnOpenTrackModal" title="Pilih Lagu (Wait &amp; Bleed, Nero Forte, atau File HP)" class="p-1.5 sm:p-2 rounded-xl transition shadow-xs active:scale-95 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700">
+                <i data-lucide="disc-3" class="w-4 h-4 text-blue-600"></i>
+              </button>
             </div>
             <div class="space-y-1">
               <h3 id="statBalance" class="text-base sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight truncate">Rp 0</h3>
@@ -572,6 +550,68 @@
     </div>
   </div>
 
+  
+  <!-- ================= MODAL: PILIHAN LAGU SLIPKNOT & FILE HP ================= -->
+  <div id="modalTrackSelector" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity overflow-y-auto">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-100 overflow-hidden p-5 space-y-4 my-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="music-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Pilih Lagu Ghoits</h3>
+            <p class="text-[11px] text-slate-500">Slipknot &amp; Lagu Favorit Anda</p>
+          </div>
+        </div>
+        <button id="btnCloseTrackModal" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Daftar Pilihan Lagu -->
+      <div class="space-y-2">
+        <!-- Opsi 1: Wait and Bleed -->
+        <button id="optWaitAndBleed" class="w-full p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center justify-between transition text-left group">
+          <div class="flex items-center gap-2.5">
+            <span class="text-lg">🤘</span>
+            <div>
+              <p class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-600">Wait and Bleed</p>
+              <p class="text-[10px] text-slate-500">Slipknot (1999)</p>
+            </div>
+          </div>
+          <span class="text-[11px] font-bold text-blue-600 px-2 py-0.5 rounded bg-blue-50">Putar</span>
+        </button>
+
+        <!-- Opsi 2: Nero Forte -->
+        <button id="optNeroForte" class="w-full p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center justify-between transition text-left group">
+          <div class="flex items-center gap-2.5">
+            <span class="text-lg">🔥</span>
+            <div>
+              <p class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-600">Nero Forte</p>
+              <p class="text-[10px] text-slate-500">Slipknot (We Are Not Your Kind)</p>
+            </div>
+          </div>
+          <span class="text-[11px] font-bold text-blue-600 px-2 py-0.5 rounded bg-blue-50">Putar</span>
+        </button>
+
+        <!-- Opsi 3: Pilih File dari HP / Laptop -->
+        <button id="optUploadFile" class="w-full p-3 rounded-xl border border-dashed border-slate-300 hover:border-blue-500 hover:bg-slate-50 flex items-center justify-between transition text-left group">
+          <div class="flex items-center gap-2.5">
+            <span class="text-lg">📁</span>
+            <div>
+              <p class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-600">Pilih File Lagu dari HP</p>
+              <p class="text-[10px] text-slate-500">Pilih lagu MP3 apa saja dari galeri/memori HP</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-blue-600"></i>
+        </button>
+      </div>
+
+      <p class="text-[10px] text-slate-400 text-center">Bisa diputar langsung di HP dan Laptop tanpa batasan izin.</p>
+    </div>
+  </div>
+
   <!-- ================= MODAL: REMOTE ACCESS & QR CODE ================= -->
   <div id="modalQrCode" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity overflow-y-auto">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden p-5 sm:p-6 space-y-4 my-auto">
@@ -630,7 +670,7 @@
     </div>
   </div>
 
-  <audio id="bgmAudio" loop preload="auto"></audio>
+  <audio id="bgmAudio" loop preload="auto" playsinline webkit-playsinline></audio>
   <!-- Application Logic -->
   <script src="js/app.js"></script>
 </body>

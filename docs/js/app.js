@@ -118,134 +118,139 @@ async function saveToCloudDatabase(fullDb) {
   }
 }
 
-// ================= SISTEM LAGU SLIPKNOT (WAIT AND BLEED & NERO FORTE) ================= //
-let currentTrackKey = 'wait_and_bleed';
-let customNeroForteUrl = null;
-let isMusicPlaying = false;
-let audioInstance = null;
-let audioUnlocked = false;
+// ================= SISTEM LAGU SLIPKNOT & MOBILE AUDIO SAFE ================= //
 
-function unlockAudioPolicy() {
-  if (audioUnlocked) return;
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
-  if (audioInstance) {
-    audioUnlocked = true;
-    const prevMuted = audioInstance.muted;
-    audioInstance.muted = true;
-    audioInstance.play().then(() => {
-      audioInstance.pause();
-      audioInstance.muted = prevMuted;
-    }).catch(() => {});
+function getAbsoluteAudioUrl(relativePath) {
+  try {
+    return new URL(relativePath, window.location.href).href;
+  } catch (e) {
+    return relativePath;
   }
 }
 
-window.addEventListener('click', unlockAudioPolicy, { once: true });
-window.addEventListener('touchstart', unlockAudioPolicy, { once: true });
+const TRACKS = {
+  wait_and_bleed: {
+    id: 'wait_and_bleed',
+    name: 'Wait & Bleed',
+    url: getAbsoluteAudioUrl('audio/wait-and-bleed.mp3')
+  },
+  nero_forte: {
+    id: 'nero_forte',
+    name: 'Nero Forte',
+    url: getAbsoluteAudioUrl('audio/wait-and-bleed.mp3') // Fallback audio
+  }
+};
+
+let currentTrackKey = 'wait_and_bleed';
+let customUserTrackUrl = null;
+let customUserTrackName = '';
+let isMusicPlaying = false;
+let audioInstance = null;
 
 function initMusicSystem() {
   audioInstance = document.getElementById('bgmAudio');
   if (!audioInstance) return;
 
-  audioInstance.volume = 0.65;
+  audioInstance.volume = 0.7;
   audioInstance.loop = true;
 
-  audioInstance.addEventListener('ended', () => {
-    isMusicPlaying = false;
-    updateMusicButtonUI();
-  });
-
-  const btnPlay = document.getElementById('btnPlayCustomMusic');
-  const selectTrack = document.getElementById('selectSlipknotTrack');
-  const fileInput = document.getElementById('inputCustomAudio');
-
-  if (btnPlay) {
-    btnPlay.addEventListener('click', handleMusicPlayClick);
-  }
-
-  if (selectTrack) {
-    selectTrack.addEventListener('change', handleTrackSelectionChange);
-  }
-
-  if (fileInput) {
-    fileInput.addEventListener('change', handleAudioFileSelected);
-  }
-
+  // Set default audio src langsung
   const savedTrack = localStorage.getItem('ghoits_active_track') || 'wait_and_bleed';
   currentTrackKey = savedTrack;
-  if (selectTrack) selectTrack.value = savedTrack;
+  const initialUrl = (savedTrack === 'custom' && customUserTrackUrl) ? customUserTrackUrl : TRACKS[savedTrack]?.url || TRACKS.wait_and_bleed.url;
+  audioInstance.src = initialUrl;
 
-  setAudioTrack(savedTrack);
+  const btnPlay = document.getElementById('btnPlayCustomMusic');
+  const btnOpenModal = document.getElementById('btnOpenTrackModal');
+  const btnCloseModal = document.getElementById('btnCloseTrackModal');
+  const fileInput = document.getElementById('inputCustomAudio');
+
+  if (btnPlay) btnPlay.addEventListener('click', handleMusicPlayClick);
+  if (btnOpenModal) btnOpenModal.addEventListener('click', openTrackModal);
+  if (btnCloseModal) btnCloseModal.addEventListener('click', closeTrackModal);
+
+  // Modal options
+  const optWait = document.getElementById('optWaitAndBleed');
+  const optNero = document.getElementById('optNeroForte');
+  const optUpload = document.getElementById('optUploadFile');
+
+  if (optWait) optWait.addEventListener('click', () => selectTrack('wait_and_bleed', 'Wait & Bleed - Slipknot'));
+  if (optNero) optNero.addEventListener('click', () => selectTrack('nero_forte', 'Nero Forte - Slipknot'));
+  if (optUpload && fileInput) optUpload.addEventListener('click', () => { closeTrackModal(); fileInput.click(); });
+
+  if (fileInput) fileInput.addEventListener('change', handleAudioFileSelected);
+
   updateMusicButtonUI();
 }
 
-function setAudioTrack(trackKey) {
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
-  if (!audioInstance) return;
+function openTrackModal() {
+  const modal = document.getElementById('modalTrackSelector');
+  if (modal) modal.classList.remove('hidden');
+  lucide.createIcons();
+}
 
+function closeTrackModal() {
+  const modal = document.getElementById('modalTrackSelector');
+  if (modal) modal.classList.add('hidden');
+}
+
+function selectTrack(trackKey, displayName) {
   currentTrackKey = trackKey;
   localStorage.setItem('ghoits_active_track', trackKey);
 
-  let targetUrl = 'audio/wait-and-bleed.mp3';
-  if (trackKey === 'nero_forte') {
-    targetUrl = customNeroForteUrl || 'audio/wait-and-bleed.mp3';
-  } else if (trackKey === 'wait_and_bleed') {
-    targetUrl = 'audio/wait-and-bleed.mp3';
+  const targetUrl = TRACKS[trackKey]?.url || TRACKS.wait_and_bleed.url;
+
+  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
+  if (audioInstance) {
+    audioInstance.src = targetUrl;
+    // Di mobile, langsung play saat klik user eksplisit
+    audioInstance.play().then(() => {
+      isMusicPlaying = true;
+      showToast('Memutar Lagu 🤘', displayName, true);
+      updateMusicButtonUI();
+    }).catch(err => {
+      console.warn('Play error:', err);
+    });
   }
 
-  audioInstance.src = targetUrl;
-  audioInstance.load();
+  closeTrackModal();
+  updateMusicButtonUI();
 }
 
-function handleTrackSelectionChange(e) {
-  const selected = e.target.value;
-  if (selected === 'custom') {
-    const fileInput = document.getElementById('inputCustomAudio');
-    if (fileInput) fileInput.click();
-    return;
-  }
+function handleMusicPlayClick(e) {
+  if (e) e.stopPropagation();
 
-  setAudioTrack(selected);
-
-  if (selected === 'nero_forte') {
-    showToast('Lagu Dipilih 🤘', 'Nero Forte - Slipknot', true);
-  } else {
-    showToast('Lagu Dipilih 🤘', 'Wait and Bleed - Slipknot', true);
-  }
-
-  if (isMusicPlaying) {
-    audioInstance.play().catch(() => {});
-  }
-}
-
-function handleMusicPlayClick() {
   if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
   if (!audioInstance) return;
 
+  // Pastikan src terpasang
   if (!audioInstance.src || audioInstance.src === '' || audioInstance.src.endsWith('/')) {
-    setAudioTrack(currentTrackKey);
+    audioInstance.src = TRACKS[currentTrackKey]?.url || TRACKS.wait_and_bleed.url;
   }
 
   if (isMusicPlaying) {
     audioInstance.pause();
     isMusicPlaying = false;
-    showToast('Musik Dijeda', currentTrackKey === 'nero_forte' ? 'Nero Forte dijeda' : 'Wait and Bleed dijeda', true);
+    showToast('Musik Dijeda', getTrackDisplayName(), true);
     updateMusicButtonUI();
   } else {
+    // Di mobile HP, panggil play() langsung di tap handler
     const playPromise = audioInstance.play();
     if (playPromise !== undefined) {
       playPromise.then(() => {
         isMusicPlaying = true;
-        const trackTitle = currentTrackKey === 'nero_forte' ? 'Nero Forte 🤘' : 'Wait and Bleed 🤘';
-        showToast('Memutar Lagu', trackTitle, true);
+        showToast('Memutar Lagu 🤘', getTrackDisplayName(), true);
         updateMusicButtonUI();
       }).catch(err => {
-        console.warn('Play retry:', err);
+        console.warn('Audio play error:', err);
+        // Fallback: buka modal pilihan jika belum siap
+        showToast('Memutar Audio', 'Menghubungkan ke pemutar audio...', true);
         setTimeout(() => {
           audioInstance.play().then(() => {
             isMusicPlaying = true;
             updateMusicButtonUI();
           }).catch(() => {});
-        }, 150);
+        }, 100);
       });
     }
   }
@@ -256,19 +261,28 @@ function handleAudioFileSelected(e) {
   if (!file) return;
 
   const url = URL.createObjectURL(file);
-  customNeroForteUrl = url;
+  customUserTrackUrl = url;
+  customUserTrackName = file.name.replace(/\.[^/.]+$/, '');
+  currentTrackKey = 'custom';
+  localStorage.setItem('ghoits_active_track', 'custom');
 
+  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
   if (audioInstance) {
     audioInstance.src = url;
-    audioInstance.load();
     audioInstance.play().then(() => {
       isMusicPlaying = true;
+      showToast('Memutar Lagu dari HP 🎵', customUserTrackName, true);
       updateMusicButtonUI();
-    }).catch(e => {});
+    }).catch(err => console.warn(err));
   }
 
-  showToast('Lagu Diputar', file.name.replace(/\.[^/.]+$/, ''), true);
   updateMusicButtonUI();
+}
+
+function getTrackDisplayName() {
+  if (currentTrackKey === 'nero_forte') return 'Nero Forte';
+  if (currentTrackKey === 'custom') return customUserTrackName || 'Lagu Saya';
+  return 'Wait & Bleed';
 }
 
 function updateMusicVisibility() {
@@ -296,17 +310,20 @@ function updateMusicButtonUI() {
 
   if (!btn) return;
 
+  if (text) {
+    text.textContent = getTrackDisplayName();
+  }
+
   if (isMusicPlaying) {
     btn.classList.add('bg-blue-700');
-    if (text) text.textContent = 'Pause';
     if (icon) icon.setAttribute('data-lucide', 'pause');
   } else {
     btn.classList.remove('bg-blue-700');
-    if (text) text.textContent = 'Play';
     if (icon) icon.setAttribute('data-lucide', 'play');
   }
   lucide.createIcons();
 }
+
 
 
 /**
