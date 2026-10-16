@@ -144,6 +144,13 @@
           <!-- Quick Actions Header -->
           <div class="flex items-center gap-1.5 sm:gap-3">
             
+            
+            <!-- Indikator Cloud Sync (Satu Jalur) -->
+            <div id="syncIndicator" title="Data Otomatis Sinkron Cloud (HP & Laptop Satu Jalur)" class="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200/60">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="syncText">Cloud Sync Aktif</span>
+            </div>
+
             <!-- Tombol Ganti Akun / Logout -->
             <button id="btnSwitchAccount" title="Ganti Akun / Pindah Profil" class="inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs active:scale-95 theme-switch-btn">
               <i data-lucide="arrow-left-right" class="w-4 h-4 text-indigo-600"></i>
@@ -152,43 +159,26 @@
 
             
             <!-- Tombol Musik Khusus Ghoits (Lagu Sendiri) -->
-            <div id="ghoitsMusicContainer" class="hidden items-center gap-1">
+            <!-- Tombol Musik Khusus Ghoits (Wait and Bleed & Nero Forte) -->
+            <!-- Tombol Musik Khusus Ghoits (Wait and Bleed & Nero Forte) -->
+            <div id="ghoitsMusicContainer" class="hidden items-center gap-1.5">
               <input type="file" id="inputCustomAudio" accept="audio/*" class="hidden">
-              <button id="btnPlayCustomMusic" title="Putar / Jeda Lagu Saya" class="theme-music-btn inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition shadow-xs active:scale-95 bg-white hover:bg-slate-50 border border-slate-200">
-                <i data-lucide="music" id="musicIcon" class="w-4 h-4 text-slate-500"></i>
-                <span id="musicText" class="max-w-[100px] sm:max-w-[130px] truncate text-xs font-semibold text-slate-700">Pilih Lagu</span>
-              </button>
-              <button id="btnChangeCustomMusic" title="Ganti Lagu dari HP" class="p-2 sm:p-2.5 text-xs font-semibold rounded-xl transition shadow-xs active:scale-95 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-indigo-600">
-                <i data-lucide="folder-music" class="w-4 h-4"></i>
+              
+              <!-- Dropdown Pilihan Lagu Slipknot -->
+              <div class="relative flex items-center">
+                <select id="selectSlipknotTrack" class="text-xs font-semibold py-1.5 sm:py-2 pl-2 sm:pl-3 pr-6 bg-slate-800 text-white border border-slate-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-xs">
+                  <option value="wait_and_bleed">🤘 Wait and Bleed</option>
+                  <option value="nero_forte">🔥 Nero Forte</option>
+                  <option value="custom">📁 Lagu Sendiri...</option>
+                </select>
+              </div>
+
+              <!-- Tombol Play / Pause -->
+              <button id="btnPlayCustomMusic" title="Putar / Jeda Lagu" class="theme-music-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-semibold rounded-xl transition shadow-xs active:scale-95 bg-blue-600 hover:bg-blue-700 text-white">
+                <i data-lucide="play" id="musicIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white"></i>
+                <span id="musicText" class="hidden sm:inline text-xs font-semibold">Play</span>
               </button>
             </div>
-  
-            <!-- Print Report -->
-            <button id="btnPrint" title="Cetak Laporan" class="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs">
-              <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
-              <span class="hidden md:inline">Cetak</span>
-            </button>
-
-            <!-- Export CSV -->
-            <button id="btnExportCsv" title="Ekspor CSV" class="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition shadow-xs">
-              <i data-lucide="download" class="w-4 h-4 text-slate-500"></i>
-              <span class="hidden md:inline">Ekspor CSV</span>
-            </button>
-
-            <!-- Remote & QR Code Button -->
-            <button id="btnOpenQrModal" title="Akses Jarak Jauh & QR Code" class="inline-flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/60 rounded-xl transition shadow-xs active:scale-95 theme-qr-btn">
-              <i data-lucide="qr-code" class="w-4 h-4 text-indigo-600"></i>
-              <span class="hidden sm:inline">Akses HP</span>
-            </button>
-
-            <!-- Add Transaction Button -->
-            <button id="btnOpenAddModal" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl shadow-md shadow-indigo-600/20 active:scale-95 transition theme-primary-btn">
-              <i data-lucide="plus-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-              <span class="sm:inline">Catat Transaksi</span>
-            </button>
-          </div>
-        </div>
-      </div>
     </header>
 
     <!-- MAIN DASHBOARD CONTENT -->

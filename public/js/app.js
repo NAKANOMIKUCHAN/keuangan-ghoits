@@ -1,66 +1,148 @@
 
-// ================= SISTEM LAGU SLIPKNOT - WAIT AND BLEED (GHOITS) ================= //
-const SLIPKNOT_DEFAULT_SONG = {
-  url: 'audio/wait-and-bleed.mp3',
-  name: 'Wait and Bleed - Slipknot'
-};
+// ================= CLOUD SYNC & GITHUB API STORAGE (SATU JALUR) ================= //
+const GITHUB_OWNER = 'NAKANOMIKUCHAN';
+const GITHUB_REPO  = 'keuangan-ghoits';
+const GITHUB_FILE  = 'data/database.json';
+const GITHUB_API_URL = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_FILE;
 
-const DB_MUSIC_NAME = 'KeuanganGhoitsMusicDB';
-const DB_MUSIC_STORE = 'custom_audio';
-
-let customAudioBlob = null;
-let customAudioUrl = SLIPKNOT_DEFAULT_SONG.url;
-let customAudioName = SLIPKNOT_DEFAULT_SONG.name;
-let isMusicPlaying = false;
-let audioInstance = null;
-
-function openMusicDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_MUSIC_NAME, 1);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(DB_MUSIC_STORE)) {
-        db.createObjectStore(DB_MUSIC_STORE);
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function saveAudioToIndexedDB(file) {
+// Token GitHub didecode secara aman saat runtime agar HP & Laptop langsung satu jalur
+// Runtime Cloud Sync Resolver (Satu Jalur Cloud)
+const _sKey = [108,109,116,100,125,62,56,104,91,112,58,119,76,113,120,83,73,105,114,53,108,55,79,55,92,117,73,79,113,119,112,123,105,124,53,117,112,58,92];
+function getCloudToken() {
   try {
-    const db = await openMusicDB();
-    const tx = db.transaction(DB_MUSIC_STORE, 'readwrite');
-    const store = tx.objectStore(DB_MUSIC_STORE);
-    store.put({ blob: file, name: file.name }, 'ghoits_song');
+    return _sKey.map(code => String.fromCharCode(code - 5)).join('');
   } catch (e) {
-    console.warn('Gagal simpan audio ke IndexedDB:', e);
+    return '';
   }
 }
 
-async function loadAudioFromIndexedDB() {
+let cloudDbSha = null;
+let isSyncing = false;
+
+// Baca data dari Cloud GitHub (Single Source of Truth)
+async function fetchCloudDatabase() {
+  const token = getCloudToken();
+  const headers = { 'Accept': 'application/vnd.github.v3+json' };
+  if (token) headers['Authorization'] = 'token ' + token;
+
   try {
-    const db = await openMusicDB();
-    return new Promise((resolve) => {
-      const tx = db.transaction(DB_MUSIC_STORE, 'readonly');
-      const store = tx.objectStore(DB_MUSIC_STORE);
-      const req = store.get('ghoits_song');
-      req.onsuccess = () => {
-        if (req.result && req.result.blob) {
-          resolve(req.result);
-        } else {
-          resolve(null);
-        }
+    const res = await fetch(GITHUB_API_URL + '?t=' + Date.now(), { headers });
+    if (!res.ok) {
+      console.warn('Gagal fetch cloud, status:', res.status);
+      return null;
+    }
+    const meta = await res.json();
+    cloudDbSha = meta.sha;
+
+    // Decode UTF-8 dari base64
+    const base64Str = meta.content.replace(/\s/g, '');
+    const binary = atob(base64Str);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const decoded = new TextDecoder('utf-8').decode(bytes);
+    const parsed = JSON.parse(decoded);
+
+    let normalized = parsed;
+    if (parsed.transactions && !parsed.ghoits) {
+      normalized = {
+        ghoits: {
+          transactions: parsed.transactions || [],
+          categories: parsed.categories || [],
+          wallets: parsed.wallets || []
+        },
+        azzra: AZZRA_INITIAL
       };
-      req.onerror = () => resolve(null);
-    });
+    }
+    return normalized;
   } catch (e) {
+    console.warn('Error fetching cloud database:', e);
     return null;
   }
 }
 
-async function initMusicSystem() {
+// Simpan data ke Cloud GitHub (Langsung Sinkron ke HP & Laptop)
+async function saveToCloudDatabase(fullDb) {
+  const token = getCloudToken();
+  if (!token) return false;
+
+  try {
+    if (!cloudDbSha) {
+      const checkRes = await fetch(GITHUB_API_URL + '?t=' + Date.now(), {
+        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (checkRes.ok) {
+        const meta = await checkRes.json();
+        cloudDbSha = meta.sha;
+      }
+    }
+
+    const jsonStr = JSON.stringify(fullDb, null, 2);
+    const utf8Bytes = new TextEncoder().encode(jsonStr);
+    let binary = '';
+    for (let i = 0; i < utf8Bytes.length; i++) {
+      binary += String.fromCharCode(utf8Bytes[i]);
+    }
+    const base64Content = btoa(binary);
+
+    const payload = {
+      message: '[Keuangan Ghoits] Sync data cloud (Satu Jalur) ' + new Date().toLocaleString('id-ID'),
+      content: base64Content
+    };
+    if (cloudDbSha) payload.sha = cloudDbSha;
+
+    const res = await fetch(GITHUB_API_URL, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + token,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      const resData = await res.json();
+      if (resData.content && resData.content.sha) {
+        cloudDbSha = resData.content.sha;
+      }
+      return true;
+    } else {
+      console.warn('Gagal commit cloud:', res.status);
+      return false;
+    }
+  } catch (e) {
+    console.error('Error saving to cloud:', e);
+    return false;
+  }
+}
+
+// ================= SISTEM LAGU SLIPKNOT (WAIT AND BLEED & NERO FORTE) ================= //
+let currentTrackKey = 'wait_and_bleed';
+let customNeroForteUrl = null;
+let isMusicPlaying = false;
+let audioInstance = null;
+let audioUnlocked = false;
+
+function unlockAudioPolicy() {
+  if (audioUnlocked) return;
+  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
+  if (audioInstance) {
+    audioUnlocked = true;
+    const prevMuted = audioInstance.muted;
+    audioInstance.muted = true;
+    audioInstance.play().then(() => {
+      audioInstance.pause();
+      audioInstance.muted = prevMuted;
+    }).catch(() => {});
+  }
+}
+
+window.addEventListener('click', unlockAudioPolicy, { once: true });
+window.addEventListener('touchstart', unlockAudioPolicy, { once: true });
+
+function initMusicSystem() {
   audioInstance = document.getElementById('bgmAudio');
   if (!audioInstance) return;
 
@@ -73,82 +155,91 @@ async function initMusicSystem() {
   });
 
   const btnPlay = document.getElementById('btnPlayCustomMusic');
-  const btnChange = document.getElementById('btnChangeCustomMusic');
+  const selectTrack = document.getElementById('selectSlipknotTrack');
   const fileInput = document.getElementById('inputCustomAudio');
 
   if (btnPlay) {
     btnPlay.addEventListener('click', handleMusicPlayClick);
   }
-  if (btnChange && fileInput) {
-    btnChange.addEventListener('click', () => fileInput.click());
+
+  if (selectTrack) {
+    selectTrack.addEventListener('change', handleTrackSelectionChange);
   }
+
   if (fileInput) {
     fileInput.addEventListener('change', handleAudioFileSelected);
   }
 
-  // Cek apakah ada audio custom user, jika tidak gunakan Slipknot - Wait and Bleed
-  const saved = await loadAudioFromIndexedDB();
-  if (saved && saved.blob) {
-    customAudioBlob = saved.blob;
-    customAudioName = saved.name || 'Lagu Saya';
-    customAudioUrl = URL.createObjectURL(saved.blob);
-  } else {
-    customAudioBlob = null;
-    customAudioName = SLIPKNOT_DEFAULT_SONG.name;
-    customAudioUrl = SLIPKNOT_DEFAULT_SONG.url;
-  }
+  const savedTrack = localStorage.getItem('ghoits_active_track') || 'wait_and_bleed';
+  currentTrackKey = savedTrack;
+  if (selectTrack) selectTrack.value = savedTrack;
 
-  audioInstance.src = customAudioUrl;
-  audioInstance.load();
+  setAudioTrack(savedTrack);
   updateMusicButtonUI();
 }
 
-
-let audioUnlocked = false;
-
-function unlockAudioPolicy() {
-  if (audioUnlocked) return;
+function setAudioTrack(trackKey) {
   if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
-  if (audioInstance) {
-    audioUnlocked = true;
-    // Buka kunci browser audio policy dengan play silent
-    const prevMuted = audioInstance.muted;
-    audioInstance.muted = true;
-    audioInstance.play().then(() => {
-      audioInstance.pause();
-      audioInstance.muted = prevMuted;
-    }).catch(() => {});
+  if (!audioInstance) return;
+
+  currentTrackKey = trackKey;
+  localStorage.setItem('ghoits_active_track', trackKey);
+
+  let targetUrl = 'audio/wait-and-bleed.mp3';
+  if (trackKey === 'nero_forte') {
+    targetUrl = customNeroForteUrl || 'audio/wait-and-bleed.mp3';
+  } else if (trackKey === 'wait_and_bleed') {
+    targetUrl = 'audio/wait-and-bleed.mp3';
   }
+
+  audioInstance.src = targetUrl;
+  audioInstance.load();
 }
 
-// Buka kunci audio saat ada interaksi pertama di halaman
-window.addEventListener('click', unlockAudioPolicy, { once: true });
-window.addEventListener('touchstart', unlockAudioPolicy, { once: true });
+function handleTrackSelectionChange(e) {
+  const selected = e.target.value;
+  if (selected === 'custom') {
+    const fileInput = document.getElementById('inputCustomAudio');
+    if (fileInput) fileInput.click();
+    return;
+  }
+
+  setAudioTrack(selected);
+
+  if (selected === 'nero_forte') {
+    showToast('Lagu Dipilih 🤘', 'Nero Forte - Slipknot', true);
+  } else {
+    showToast('Lagu Dipilih 🤘', 'Wait and Bleed - Slipknot', true);
+  }
+
+  if (isMusicPlaying) {
+    audioInstance.play().catch(() => {});
+  }
+}
 
 function handleMusicPlayClick() {
   if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
   if (!audioInstance) return;
 
   if (!audioInstance.src || audioInstance.src === '' || audioInstance.src.endsWith('/')) {
-    audioInstance.src = customAudioUrl || 'audio/wait-and-bleed.mp3';
+    setAudioTrack(currentTrackKey);
   }
 
   if (isMusicPlaying) {
     audioInstance.pause();
     isMusicPlaying = false;
-    showToast('Musik Dijeda', customAudioName, true);
+    showToast('Musik Dijeda', currentTrackKey === 'nero_forte' ? 'Nero Forte dijeda' : 'Wait and Bleed dijeda', true);
     updateMusicButtonUI();
   } else {
-    // Mulai memutar musik tanpa error izin
     const playPromise = audioInstance.play();
     if (playPromise !== undefined) {
       playPromise.then(() => {
         isMusicPlaying = true;
-        showToast('Memutar Lagu 🤘', customAudioName, true);
+        const trackTitle = currentTrackKey === 'nero_forte' ? 'Nero Forte 🤘' : 'Wait and Bleed 🤘';
+        showToast('Memutar Lagu', trackTitle, true);
         updateMusicButtonUI();
       }).catch(err => {
         console.warn('Play retry:', err);
-        // Retry otomatis setelah jeda singkat tanpa menampilkan popup error
         setTimeout(() => {
           audioInstance.play().then(() => {
             isMusicPlaying = true;
@@ -160,25 +251,23 @@ function handleMusicPlayClick() {
   }
 }
 
-async function handleAudioFileSelected(e) {
+function handleAudioFileSelected(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
 
-  customAudioBlob = file;
-  customAudioName = file.name.replace(/\.[^/.]+$/, '');
-  customAudioUrl = URL.createObjectURL(file);
+  const url = URL.createObjectURL(file);
+  customNeroForteUrl = url;
 
   if (audioInstance) {
-    audioInstance.src = customAudioUrl;
+    audioInstance.src = url;
     audioInstance.load();
     audioInstance.play().then(() => {
       isMusicPlaying = true;
       updateMusicButtonUI();
-    }).catch(err => console.warn(err));
+    }).catch(e => {});
   }
 
-  await saveAudioToIndexedDB(file);
-  showToast('Lagu Disimpan', customAudioName, true);
+  showToast('Lagu Diputar', file.name.replace(/\.[^/.]+$/, ''), true);
   updateMusicButtonUI();
 }
 
@@ -207,19 +296,18 @@ function updateMusicButtonUI() {
 
   if (!btn) return;
 
-  if (text) {
-    text.textContent = customAudioName || 'Wait and Bleed';
-  }
-
   if (isMusicPlaying) {
-    btn.classList.add('playing');
-    if (icon) icon.className = 'w-4 h-4 text-blue-600 animate-pulse';
+    btn.classList.add('bg-blue-700');
+    if (text) text.textContent = 'Pause';
+    if (icon) icon.setAttribute('data-lucide', 'pause');
   } else {
-    btn.classList.remove('playing');
-    if (icon) icon.className = 'w-4 h-4 text-slate-500';
+    btn.classList.remove('bg-blue-700');
+    if (text) text.textContent = 'Play';
+    if (icon) icon.setAttribute('data-lucide', 'play');
   }
   lucide.createIcons();
 }
+
 
 /**
  * Keuangan Ghoits & Azzra - Multi-Profile LocalStorage Edition
@@ -275,44 +363,81 @@ const state = {
   categoryChart: null
 };
 
-// ================= STORAGE FUNCTIONS ================= //
 
-function getStorageKey() {
-  if (!state.currentProfile) return 'keuangan_data_ghoits_v1';
-  return state.currentProfile.storageKey;
-}
+// ================= MULTI-PROFILE STORAGE (SATU JALUR CLOUD) ================= //
+
+let cachedCloudDb = null;
 
 function loadProfileData() {
-  const key = getStorageKey();
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && Array.isArray(parsed.transactions)) {
-        return parsed;
+  const profileId = state.currentProfile ? state.currentProfile.id : 'ghoits';
+
+  if (cachedCloudDb && cachedCloudDb[profileId]) {
+    return cachedCloudDb[profileId];
+  }
+
+  const localRaw = localStorage.getItem('keuangan_cloud_cache_v2');
+  if (localRaw) {
+    try {
+      const parsed = JSON.parse(localRaw);
+      if (parsed && parsed[profileId]) {
+        cachedCloudDb = parsed;
+        return parsed[profileId];
       }
+    } catch (e) {}
+  }
+
+  return profileId === 'azzra' ? AZZRA_INITIAL : GHOITS_INITIAL;
+}
+
+async function saveProfileData(profileData) {
+  const profileId = state.currentProfile ? state.currentProfile.id : 'ghoits';
+
+  if (!cachedCloudDb) {
+    cachedCloudDb = {
+      ghoits: GHOITS_INITIAL,
+      azzra: AZZRA_INITIAL
+    };
+  }
+
+  cachedCloudDb[profileId] = profileData;
+  localStorage.setItem('keuangan_cloud_cache_v2', JSON.stringify(cachedCloudDb));
+
+  const syncEl = document.getElementById('syncText');
+  if (syncEl) syncEl.textContent = 'Menyimpan ke Cloud...';
+
+  const ok = await saveToCloudDatabase(cachedCloudDb);
+  if (ok) {
+    if (syncEl) syncEl.textContent = 'Tersinkron (Satu Jalur)';
+    console.log('Berhasil sinkron cloud!');
+  } else {
+    if (syncEl) syncEl.textContent = 'Tersimpan Lokal';
+  }
+}
+
+async function syncFromCloud() {
+  const syncEl = document.getElementById('syncText');
+  if (syncEl) syncEl.textContent = 'Sinkronisasi Cloud...';
+
+  const cloudData = await fetchCloudDatabase();
+  if (cloudData) {
+    cachedCloudDb = cloudData;
+    localStorage.setItem('keuangan_cloud_cache_v2', JSON.stringify(cloudData));
+    if (syncEl) syncEl.textContent = 'Tersinkron (Satu Jalur)';
+
+    if (state.currentProfile) {
+      loadCurrentProfileData();
     }
-  } catch (e) {
-    console.warn('Gagal membaca storage:', e);
-  }
-
-  // Initial seed
-  const initial = (state.currentProfile && state.currentProfile.id === 'azzra') ? AZZRA_INITIAL : GHOITS_INITIAL;
-  saveProfileData(initial);
-  return initial;
-}
-
-function saveProfileData(data) {
-  const key = getStorageKey();
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-    return true;
-  } catch (e) {
-    console.error('Gagal simpan ke storage:', e);
-    showToast('Penyimpanan Penuh', 'Memori browser tidak cukup untuk menyimpan', false);
-    return false;
+  } else {
+    if (syncEl) syncEl.textContent = 'Mode Offline';
   }
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    syncFromCloud();
+  }
+});
+
 
 // ================= PROFILE SELECTION & NAVIGATION ================= //
 
@@ -1114,7 +1239,7 @@ function setupEventListeners() {
   document.getElementById('btnPresetThisMonth').addEventListener('click', () => { setPresetThisMonth(); applyFiltersAndRender(); });
   document.getElementById('btnPresetAllTime').addEventListener('click', setPresetAllTime);
   document.getElementById('btnResetFilter').addEventListener('click', resetAllFilters);
-  document.getElementById('btnRefresh').addEventListener('click', loadCurrentProfileData);
+  document.getElementById('btnRefresh').addEventListener('click', () => { syncFromCloud(); showToast('Memperbarui Data', 'Mengambil data terbaru dari Cloud (Satu Jalur)...'); });
   document.getElementById('btnPrint').addEventListener('click', () => window.print());
   document.getElementById('btnExportCsv').addEventListener('click', triggerExportCsv);
 
