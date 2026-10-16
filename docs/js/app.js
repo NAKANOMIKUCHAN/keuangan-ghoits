@@ -1,97 +1,193 @@
 
-// ================= AUDIO & BGM PLAYLIST SYSTEM ================= //
-const BGM_TRACKS = {
-  ghoits: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3', // Chill Lofi Study Beat
-  azzra: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=sweet-love-10928.mp3'    // Sweet Romantic Cozy Piano
-};
+// ================= SISTEM LAGU SENDIRI KHUSUS GHOITS ================= //
+const DB_MUSIC_NAME = 'KeuanganGhoitsMusicDB';
+const DB_MUSIC_STORE = 'custom_audio';
 
+let customAudioBlob = null;
+let customAudioName = '';
 let isMusicPlaying = false;
 let audioInstance = null;
 
-function initMusicSystem() {
-  audioInstance = document.getElementById('bgmAudio');
-  if (!audioInstance) return;
-
-  audioInstance.volume = 0.45; // Volume santai dan pas
-
-  const btnToggle = document.getElementById('btnToggleMusic');
-  if (btnToggle) {
-    btnToggle.addEventListener('click', toggleMusic);
-  }
-}
-
-function playProfileMusic(profileId) {
-  if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
-  if (!audioInstance) return;
-
-  const trackUrl = BGM_TRACKS[profileId] || BGM_TRACKS.ghoits;
-
-  // Jika lagu berubah
-  if (audioInstance.src !== trackUrl) {
-    audioInstance.src = trackUrl;
-    audioInstance.load();
-  }
-
-  audioInstance.play().then(() => {
-    isMusicPlaying = true;
-    updateMusicButtonUI();
-  }).catch((err) => {
-    console.warn('Autoplay tertahan kebijakan browser, menunggu klik:', err);
-    isMusicPlaying = false;
-    updateMusicButtonUI();
+// IndexedDB Helper untuk menyimpan file lagu MP3 user di browser HP
+function openMusicDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_MUSIC_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(DB_MUSIC_STORE)) {
+        db.createObjectStore(DB_MUSIC_STORE);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
   });
 }
 
-function stopMusic() {
-  if (audioInstance) {
-    audioInstance.pause();
+async function saveAudioToIndexedDB(file) {
+  try {
+    const db = await openMusicDB();
+    const tx = db.transaction(DB_MUSIC_STORE, 'readwrite');
+    const store = tx.objectStore(DB_MUSIC_STORE);
+    store.put({ blob: file, name: file.name }, 'ghoits_song');
+  } catch (e) {
+    console.warn('Gagal simpan audio ke IndexedDB:', e);
+  }
+}
+
+async function loadAudioFromIndexedDB() {
+  try {
+    const db = await openMusicDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(DB_MUSIC_STORE, 'readonly');
+      const store = tx.objectStore(DB_MUSIC_STORE);
+      const req = store.get('ghoits_song');
+      req.onsuccess = () => {
+        if (req.result && req.result.blob) {
+          resolve(req.result);
+        } else {
+          resolve(null);
+        }
+      };
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+async function initMusicSystem() {
+  audioInstance = document.getElementById('bgmAudio');
+  if (!audioInstance) return;
+
+  audioInstance.volume = 0.65;
+  audioInstance.loop = true;
+
+  // Event listener selesai lagu jika tidak loop
+  audioInstance.addEventListener('ended', () => {
     isMusicPlaying = false;
+    updateMusicButtonUI();
+  });
+
+  const btnPlay = document.getElementById('btnPlayCustomMusic');
+  const btnChange = document.getElementById('btnChangeCustomMusic');
+  const fileInput = document.getElementById('inputCustomAudio');
+
+  if (btnPlay) {
+    btnPlay.addEventListener('click', handleMusicPlayClick);
+  }
+  if (btnChange && fileInput) {
+    btnChange.addEventListener('click', () => fileInput.click());
+  }
+  if (fileInput) {
+    fileInput.addEventListener('change', handleAudioFileSelected);
+  }
+
+  // Load lagu yang sebelumnya sudah pernah di-upload di Ghoits
+  const saved = await loadAudioFromIndexedDB();
+  if (saved && saved.blob) {
+    customAudioBlob = saved.blob;
+    customAudioName = saved.name || 'Lagu Saya';
+    setAudioSource(saved.blob);
     updateMusicButtonUI();
   }
 }
 
-function toggleMusic() {
+function setAudioSource(blob) {
   if (!audioInstance) audioInstance = document.getElementById('bgmAudio');
   if (!audioInstance) return;
+
+  const url = URL.createObjectURL(blob);
+  audioInstance.src = url;
+  audioInstance.load();
+}
+
+function handleMusicPlayClick() {
+  const fileInput = document.getElementById('inputCustomAudio');
+
+  // Jika belum ada lagu, buka file picker
+  if (!customAudioBlob || !audioInstance || !audioInstance.src) {
+    if (fileInput) fileInput.click();
+    return;
+  }
 
   if (isMusicPlaying) {
     audioInstance.pause();
     isMusicPlaying = false;
-    showToast('Musik Jeda', 'Musik latar dinonaktifkan', true);
+    showToast('Musik Dijeda', 'Musik lagu dijeda', true);
   } else {
-    // Pastikan src sudah diset sesuai profil aktif
-    const activeProfile = state.currentProfile ? state.currentProfile.id : 'ghoits';
-    if (!audioInstance.src || !audioInstance.src.includes('.mp3')) {
-      audioInstance.src = BGM_TRACKS[activeProfile] || BGM_TRACKS.ghoits;
-      audioInstance.load();
-    }
     audioInstance.play().then(() => {
       isMusicPlaying = true;
-      showToast('Musik Aktif', 'Memutar musik santai ' + (state.currentProfile ? state.currentProfile.owner : ''), true);
-    }).catch(e => console.error(e));
+      showToast('Memutar Lagu', customAudioName, true);
+    }).catch(e => {
+      console.error(e);
+      showToast('Gagal Memutar', 'Klik lagi untuk memutar lagu', false);
+    });
+  }
+  updateMusicButtonUI();
+}
+
+async function handleAudioFileSelected(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  customAudioBlob = file;
+  customAudioName = file.name.replace(/\.[^/.]+$/, ''); // Hapus ekstensi
+  setAudioSource(file);
+  await saveAudioToIndexedDB(file);
+
+  showToast('Lagu Tersimpan', 'Memutar ' + customAudioName, true);
+
+  audioInstance.play().then(() => {
+    isMusicPlaying = true;
+    updateMusicButtonUI();
+  }).catch(err => console.warn(err));
+
+  updateMusicButtonUI();
+}
+
+function updateMusicVisibility() {
+  const container = document.getElementById('ghoitsMusicContainer');
+  if (!container) return;
+
+  // HANYA MUNCUL DI GHOITS, DI AZZRA TIDAK ADA LAGU
+  if (state.currentProfile && state.currentProfile.id === 'ghoits') {
+    container.classList.remove('hidden');
+    container.classList.add('flex');
+  } else {
+    container.classList.remove('flex');
+    container.classList.add('hidden');
+    if (audioInstance) {
+      audioInstance.pause();
+      isMusicPlaying = false;
+    }
   }
   updateMusicButtonUI();
 }
 
 function updateMusicButtonUI() {
-  const btn = document.getElementById('btnToggleMusic');
+  const btn = document.getElementById('btnPlayCustomMusic');
   const icon = document.getElementById('musicIcon');
   const text = document.getElementById('musicText');
 
   if (!btn) return;
 
+  if (!customAudioBlob) {
+    if (text) text.textContent = 'Pilih Lagu';
+    btn.classList.remove('playing');
+    if (icon) icon.className = 'w-4 h-4 text-slate-500';
+    return;
+  }
+
+  if (text) {
+    text.textContent = customAudioName || 'Lagu Saya';
+  }
+
   if (isMusicPlaying) {
     btn.classList.add('playing');
-    if (text) text.textContent = 'Musik: On';
-    if (icon) {
-      icon.className = 'w-4 h-4 text-indigo-600 animate-pulse';
-    }
+    if (icon) icon.className = 'w-4 h-4 text-blue-600 animate-pulse';
   } else {
     btn.classList.remove('playing');
-    if (text) text.textContent = 'Musik: Off';
-    if (icon) {
-      icon.className = 'w-4 h-4 text-slate-500';
-    }
+    if (icon) icon.className = 'w-4 h-4 text-slate-500';
   }
   lucide.createIcons();
 }
@@ -285,13 +381,13 @@ function switchProfile(profileId) {
 
   // Load data profil
   loadCurrentProfileData();
-  playProfileMusic(profileId);
+  updateMusicVisibility();
   lucide.createIcons();
 }
 
 
 function showLoginScreen() {
-  stopMusic();
+  if (audioInstance) { audioInstance.pause(); isMusicPlaying = false; updateMusicButtonUI(); }
   document.body.classList.remove('theme-ghoits', 'theme-azzra');
   state.currentProfile = null;
   localStorage.removeItem('keuangan_active_profile');
